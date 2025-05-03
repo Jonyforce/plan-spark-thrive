@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent } from '@/components/ui/card';
@@ -64,7 +63,7 @@ export const GateChapterItem: React.FC<GateChapterItemProps> = ({
     });
   };
 
-  const calculateProgress = (lectures: GateLecture[]) => {
+  const calculateProgress = (lectures: GateLecture[]): number => {
     if (lectures.length === 0) return 0;
     const completedCount = lectures.filter(lecture => lecture.completed).length;
     return Math.round((completedCount / lectures.length) * 100);
@@ -76,6 +75,7 @@ export const GateChapterItem: React.FC<GateChapterItemProps> = ({
     }
   };
 
+  
   return (
     <Card className="border-l-2" style={{ borderLeftColor: '#A78BFA' }}>
       <div className="p-3">

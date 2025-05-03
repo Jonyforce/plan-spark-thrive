@@ -51,6 +51,7 @@ export interface StudyPlan extends BaseItem {
   type: 'study';
 }
 
+// Updated to include GateStudyPlan
 export type ProjectOrStudy = Project | StudyPlan;
 
 export interface TimeTracking {

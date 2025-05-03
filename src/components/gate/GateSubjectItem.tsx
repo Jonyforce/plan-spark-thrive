@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,17 +25,22 @@ export const GateSubjectItem: React.FC<GateSubjectItemProps> = ({
   const handleAddChapter = () => {
     if (!newChapterName.trim()) return;
     
+    const now = new Date().toISOString();
     const newChapter: GateChapter = {
       id: uuidv4(),
       name: newChapterName,
       lectures: [],
-      progress: 0
+      progress: 0,
+      status: "not-started",
+      createdAt: now,
+      updatedAt: now
     };
     
     const updatedChapters = [...subject.chapters, newChapter];
     updateSubject({
       ...subject,
-      chapters: updatedChapters
+      chapters: updatedChapters,
+      updatedAt: now
     });
     
     setNewChapterName('');
@@ -46,7 +50,8 @@ export const GateSubjectItem: React.FC<GateSubjectItemProps> = ({
     const updatedChapters = subject.chapters.filter(chapter => chapter.id !== chapterId);
     updateSubject({
       ...subject,
-      chapters: updatedChapters
+      chapters: updatedChapters,
+      updatedAt: new Date().toISOString()
     });
   };
 
@@ -59,11 +64,19 @@ export const GateSubjectItem: React.FC<GateSubjectItemProps> = ({
     const progress = updatedChapters.length 
       ? updatedChapters.reduce((sum, chapter) => sum + chapter.progress, 0) / updatedChapters.length
       : 0;
+    
+    const now = new Date().toISOString();
+    // Update the chapter status based on progress
+    const status = progress === 100 ? "completed" : 
+                  progress > 0 ? "in-progress" : 
+                  "not-started";
       
     updateSubject({
       ...subject,
       chapters: updatedChapters,
-      progress
+      progress,
+      status,
+      updatedAt: now
     });
   };
 

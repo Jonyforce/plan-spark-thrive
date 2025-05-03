@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,16 +19,21 @@ export const GateSubjectList: React.FC<GateSubjectListProps> = ({ subjects = [],
   const handleAddSubject = () => {
     if (!newSubjectName.trim()) return;
 
+    const now = new Date().toISOString();
     const newSubject: GateSubject = {
       id: uuidv4(),
       name: newSubjectName,
       chapters: [],
-      progress: 0
+      progress: 0,
+      status: "not-started",
+      createdAt: now,
+      updatedAt: now
     };
 
     setStudyPlan(prev => ({
       ...prev,
-      subjects: [...prev.subjects, newSubject]
+      subjects: [...prev.subjects, newSubject],
+      updatedAt: now
     }));
     
     setNewSubjectName('');
@@ -38,21 +42,30 @@ export const GateSubjectList: React.FC<GateSubjectListProps> = ({ subjects = [],
   const handleDeleteSubject = (subjectId: string) => {
     setStudyPlan(prev => ({
       ...prev,
-      subjects: prev.subjects.filter(subject => subject.id !== subjectId)
+      subjects: prev.subjects.filter(subject => subject.id !== subjectId),
+      updatedAt: new Date().toISOString()
     }));
   };
 
   const updateSubject = (updatedSubject: GateSubject) => {
-    setStudyPlan(prev => ({
-      ...prev,
-      subjects: prev.subjects.map(subject => 
+    setStudyPlan(prev => {
+      const updatedSubjects = prev.subjects.map(subject => 
         subject.id === updatedSubject.id ? updatedSubject : subject
-      ),
-      progress: calculateOverallProgress([
-        ...prev.subjects.filter(s => s.id !== updatedSubject.id),
-        updatedSubject
-      ])
-    }));
+      );
+      
+      const overallProgress = calculateOverallProgress(updatedSubjects);
+      const status = overallProgress === 100 ? "completed" : 
+                  overallProgress > 0 ? "in-progress" : 
+                  "not-started";
+      
+      return {
+        ...prev,
+        subjects: updatedSubjects,
+        progress: overallProgress,
+        status,
+        updatedAt: new Date().toISOString()
+      };
+    });
   };
 
   const calculateOverallProgress = (subjects: GateSubject[]) => {

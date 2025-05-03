@@ -11,6 +11,9 @@ export interface GateChapter {
   name: string;
   lectures: GateLecture[];
   progress: number; // 0-100
+  status?: "not-started" | "in-progress" | "completed";
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface GateSubject {
@@ -18,6 +21,9 @@ export interface GateSubject {
   name: string;
   chapters: GateChapter[];
   progress: number; // 0-100
+  status: "not-started" | "in-progress" | "completed";
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface GateStudyPlan {

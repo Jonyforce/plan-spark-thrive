@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { v4 as uuidv4 } from 'uuid';
@@ -18,6 +17,8 @@ const GateStudyPlanPage = () => {
   const { id } = useParams<{ id?: string }>();
   const { getStudyById, addStudy, updateStudy } = useProjectStore();
   
+  const now = new Date().toISOString();
+  
   const [studyPlan, setStudyPlan] = useState<GateStudyPlan>({
     id: id || uuidv4(),
     name: '',
@@ -27,8 +28,8 @@ const GateStudyPlanPage = () => {
     progress: 0,
     tags: ['GATE', 'exam'],
     subjects: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    createdAt: now,
+    updatedAt: now
   });
 
   useEffect(() => {
@@ -41,10 +42,18 @@ const GateStudyPlanPage = () => {
   }, [id, getStudyById]);
 
   const handleImport = (subjects: GateSubject[]) => {
-    setStudyPlan(prev => ({
-      ...prev,
-      subjects: [...prev.subjects, ...subjects]
-    }));
+    setStudyPlan(prev => {
+      const updatedSubjects = [...prev.subjects, ...subjects];
+      const overallProgress = subjects.length ? 
+        subjects.reduce((sum, subject) => sum + subject.progress, 0) / subjects.length : 0;
+      
+      return {
+        ...prev,
+        subjects: updatedSubjects,
+        progress: overallProgress,
+        updatedAt: new Date().toISOString()
+      };
+    });
   };
 
   const handleSave = () => {
