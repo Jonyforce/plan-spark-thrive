@@ -2,7 +2,7 @@
 import React from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { JsonImport } from '@/components/import/JsonImport';
-import { ProjectOrStudy } from '@/types/project';
+import { ProjectOrStudy, Project, StudyPlan } from '@/types/project';
 import { useNavigate } from 'react-router-dom';
 import { useProjectStore } from '@/stores/projectStore';
 import { updateProgressRecursively } from '@/utils/jsonValidator';
@@ -16,10 +16,10 @@ const ImportPage = () => {
     const processed = updateProgressRecursively(data);
     
     if (processed.type === 'project') {
-      addProject(processed);
+      addProject(processed as Project);
       navigate('/projects');
     } else {
-      addStudy(processed);
+      addStudy(processed as StudyPlan);
       navigate('/studies');
     }
   };
