@@ -10,14 +10,18 @@ interface GateLectureItemProps {
   lecture: GateLecture;
   updateLecture: (lecture: GateLecture) => void;
   onDelete: () => void;
+  readOnly?: boolean;
 }
 
 export const GateLectureItem: React.FC<GateLectureItemProps> = ({
   lecture,
   updateLecture,
-  onDelete
+  onDelete,
+  readOnly = false
 }) => {
   const handleToggleComplete = () => {
+    if (readOnly) return;
+    
     updateLecture({
       ...lecture,
       completed: !lecture.completed
@@ -29,6 +33,7 @@ export const GateLectureItem: React.FC<GateLectureItemProps> = ({
       <Checkbox 
         checked={lecture.completed}
         onCheckedChange={() => handleToggleComplete()}
+        disabled={readOnly}
         className="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
       />
       <span 
@@ -39,14 +44,16 @@ export const GateLectureItem: React.FC<GateLectureItemProps> = ({
       >
         {lecture.name}
       </span>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-        onClick={onDelete}
-      >
-        <Trash className="h-3 w-3 text-muted-foreground" />
-      </Button>
+      {!readOnly && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+          onClick={onDelete}
+        >
+          <Trash className="h-3 w-3 text-muted-foreground" />
+        </Button>
+      )}
     </div>
   );
 };

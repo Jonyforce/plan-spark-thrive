@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,18 +13,20 @@ interface GateSubjectItemProps {
   subject: GateSubject;
   updateSubject: (subject: GateSubject) => void;
   onDelete: () => void;
+  readOnly?: boolean;
 }
 
 export const GateSubjectItem: React.FC<GateSubjectItemProps> = ({
   subject,
   updateSubject,
-  onDelete
+  onDelete,
+  readOnly = false
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [newChapterName, setNewChapterName] = useState('');
 
   const handleAddChapter = () => {
-    if (!newChapterName.trim()) return;
+    if (!newChapterName.trim() || readOnly) return;
     
     const now = new Date().toISOString();
     const newChapter: GateChapter = {
@@ -47,6 +50,8 @@ export const GateSubjectItem: React.FC<GateSubjectItemProps> = ({
   };
 
   const handleDeleteChapter = (chapterId: string) => {
+    if (readOnly) return;
+    
     const updatedChapters = subject.chapters.filter(chapter => chapter.id !== chapterId);
     updateSubject({
       ...subject,
@@ -56,6 +61,8 @@ export const GateSubjectItem: React.FC<GateSubjectItemProps> = ({
   };
 
   const updateChapter = (updatedChapter: GateChapter) => {
+    if (readOnly) return;
+    
     const updatedChapters = subject.chapters.map(chapter =>
       chapter.id === updatedChapter.id ? updatedChapter : chapter
     );
@@ -109,31 +116,35 @@ export const GateSubjectItem: React.FC<GateSubjectItemProps> = ({
               <ProgressBar value={subject.progress} size="sm" />
             </div>
           </div>
-          <Button variant="ghost" size="sm" className="text-destructive" onClick={onDelete}>
-            <Trash className="h-4 w-4" />
-          </Button>
+          {!readOnly && (
+            <Button variant="ghost" size="sm" className="text-destructive" onClick={onDelete}>
+              <Trash className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </CardHeader>
       
       {expanded && (
         <CardContent className="pt-0 px-4 pb-3">
           <div className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Enter chapter name..."
-                value={newChapterName}
-                onChange={(e) => setNewChapterName(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="flex-1"
-              />
-              <Button 
-                size="sm" 
-                onClick={handleAddChapter} 
-                disabled={!newChapterName.trim()}
-              >
-                <Plus className="h-4 w-4 mr-1" /> Add Chapter
-              </Button>
-            </div>
+            {!readOnly && (
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter chapter name..."
+                  value={newChapterName}
+                  onChange={(e) => setNewChapterName(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="flex-1"
+                />
+                <Button 
+                  size="sm" 
+                  onClick={handleAddChapter} 
+                  disabled={!newChapterName.trim()}
+                >
+                  <Plus className="h-4 w-4 mr-1" /> Add Chapter
+                </Button>
+              </div>
+            )}
             
             <div className="space-y-3 pl-4">
               {subject.chapters.map(chapter => (
@@ -142,6 +153,7 @@ export const GateSubjectItem: React.FC<GateSubjectItemProps> = ({
                   chapter={chapter}
                   updateChapter={updateChapter}
                   onDelete={() => handleDeleteChapter(chapter.id)}
+                  readOnly={readOnly}
                 />
               ))}
               

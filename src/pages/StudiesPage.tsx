@@ -14,6 +14,7 @@ import {
 import { useProjectStore } from '@/stores/projectStore';
 import { Link } from 'react-router-dom';
 import { Search, Plus } from 'lucide-react';
+import { GateStudyPlan } from '@/types/gate';
 
 const StudiesPage = () => {
   const { studies } = useProjectStore();
@@ -40,6 +41,16 @@ const StudiesPage = () => {
           return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
       }
     });
+
+  // Determine correct link path based on study type
+  const getStudyPath = (study: any) => {
+    // Check if it's a GATE study plan
+    if (study.tags?.includes('GATE')) {
+      return `/studies/${study.id}`;
+    }
+    // For regular study plans
+    return `/studies/${study.id}`;
+  };
 
   return (
     <AppLayout>
@@ -89,7 +100,7 @@ const StudiesPage = () => {
         {filteredStudies.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredStudies.map(study => (
-              <Link key={study.id} to={`/studies/${study.id}`}>
+              <Link key={study.id} to={getStudyPath(study)}>
                 <ProjectCard project={study} />
               </Link>
             ))}

@@ -11,6 +11,7 @@ import CreateStudyPage from "./pages/CreateStudyPage";
 import ImportPage from "./pages/ImportPage";
 import NotFound from "./pages/NotFound";
 import GateStudyPlanPage from "./pages/GateStudyPlanPage";
+import GateStudyViewPage from "./pages/GateStudyViewPage";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/studies/new" element={<CreateStudyPage />} />
           <Route path="/gate-study" element={<GateStudyPlanPage />} />
           <Route path="/gate-study/:id" element={<GateStudyPlanPage />} />
+          <Route path="/studies/:id" element={<GateStudyViewPage />} />
           <Route path="/import" element={<ImportPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

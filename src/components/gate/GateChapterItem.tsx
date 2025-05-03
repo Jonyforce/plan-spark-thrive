@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,18 +13,20 @@ interface GateChapterItemProps {
   chapter: GateChapter;
   updateChapter: (chapter: GateChapter) => void;
   onDelete: () => void;
+  readOnly?: boolean;
 }
 
 export const GateChapterItem: React.FC<GateChapterItemProps> = ({
   chapter,
   updateChapter,
-  onDelete
+  onDelete,
+  readOnly = false
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [newLectureName, setNewLectureName] = useState('');
 
   const handleAddLecture = () => {
-    if (!newLectureName.trim()) return;
+    if (!newLectureName.trim() || readOnly) return;
     
     const newLecture: GateLecture = {
       id: uuidv4(),
@@ -43,6 +46,8 @@ export const GateChapterItem: React.FC<GateChapterItemProps> = ({
   };
 
   const handleDeleteLecture = (lectureId: string) => {
+    if (readOnly) return;
+    
     const updatedLectures = chapter.lectures.filter(lecture => lecture.id !== lectureId);
     updateChapter({
       ...chapter,
@@ -52,6 +57,8 @@ export const GateChapterItem: React.FC<GateChapterItemProps> = ({
   };
 
   const updateLecture = (updatedLecture: GateLecture) => {
+    if (readOnly) return;
+    
     const updatedLectures = chapter.lectures.map(lecture =>
       lecture.id === updatedLecture.id ? updatedLecture : lecture
     );
@@ -75,7 +82,6 @@ export const GateChapterItem: React.FC<GateChapterItemProps> = ({
     }
   };
 
-  
   return (
     <Card className="border-l-2" style={{ borderLeftColor: '#A78BFA' }}>
       <div className="p-3">
@@ -99,31 +105,35 @@ export const GateChapterItem: React.FC<GateChapterItemProps> = ({
               <ProgressBar value={chapter.progress} size="sm" />
             </div>
           </div>
-          <Button variant="ghost" size="sm" className="text-destructive h-8 w-8 p-0" onClick={onDelete}>
-            <Trash className="h-4 w-4" />
-          </Button>
+          {!readOnly && (
+            <Button variant="ghost" size="sm" className="text-destructive h-8 w-8 p-0" onClick={onDelete}>
+              <Trash className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         
         {expanded && (
           <CardContent className="pt-3 px-0 pb-0">
             <div className="space-y-3">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Enter lecture name..."
-                  value={newLectureName}
-                  onChange={(e) => setNewLectureName(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="flex-1"
-                  size="sm"
-                />
-                <Button 
-                  size="sm" 
-                  onClick={handleAddLecture} 
-                  disabled={!newLectureName.trim()}
-                >
-                  <Plus className="h-4 w-4 mr-1" /> Add
-                </Button>
-              </div>
+              {!readOnly && (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter lecture name..."
+                    value={newLectureName}
+                    onChange={(e) => setNewLectureName(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="flex-1"
+                    size="sm"
+                  />
+                  <Button 
+                    size="sm" 
+                    onClick={handleAddLecture} 
+                    disabled={!newLectureName.trim()}
+                  >
+                    <Plus className="h-4 w-4 mr-1" /> Add
+                  </Button>
+                </div>
+              )}
               
               <div className="space-y-2 pl-5">
                 {chapter.lectures.map(lecture => (
@@ -132,6 +142,7 @@ export const GateChapterItem: React.FC<GateChapterItemProps> = ({
                     lecture={lecture}
                     updateLecture={updateLecture}
                     onDelete={() => handleDeleteLecture(lecture.id)}
+                    readOnly={readOnly}
                   />
                 ))}
                 

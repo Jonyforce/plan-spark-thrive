@@ -51,8 +51,11 @@ export interface StudyPlan extends BaseItem {
   type: 'study';
 }
 
-// Updated to include GateStudyPlan
-export type ProjectOrStudy = Project | StudyPlan;
+// Import the GateStudyPlan directly in the project types file to avoid circular dependencies
+import { GateStudyPlan } from './gate';
+
+// Updated to explicitly include GateStudyPlan
+export type ProjectOrStudy = Project | StudyPlan | GateStudyPlan;
 
 export interface TimeTracking {
   id: string;
