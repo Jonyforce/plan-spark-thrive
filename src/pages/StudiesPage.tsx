@@ -49,11 +49,18 @@ const StudiesPage = () => {
             <h1 className="text-3xl font-bold tracking-tight">Study Plans</h1>
             <p className="text-muted-foreground">Manage and track your educational goals.</p>
           </div>
-          <Button asChild>
-            <Link to="/studies/new">
-              <Plus className="mr-2 h-4 w-4" /> New Study Plan
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline">
+              <Link to="/gate-study">
+                <Plus className="mr-2 h-4 w-4" /> GATE Study Plan
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link to="/studies/new">
+                <Plus className="mr-2 h-4 w-4" /> New Study Plan
+              </Link>
+            </Button>
+          </div>
         </div>
         
         <div className="flex gap-4 items-center">

@@ -1,0 +1,110 @@
+
+import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Plus } from 'lucide-react';
+import { GateSubjectItem } from './GateSubjectItem';
+import { GateSubject } from '@/types/gate';
+import { StudyPlan } from '@/types/project';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
+interface GateSubjectListProps {
+  subjects: any[];
+  setStudyPlan: React.Dispatch<React.SetStateAction<StudyPlan>>;
+}
+
+export const GateSubjectList: React.FC<GateSubjectListProps> = ({ subjects = [], setStudyPlan }) => {
+  const [newSubjectName, setNewSubjectName] = useState('');
+
+  const handleAddSubject = () => {
+    if (!newSubjectName.trim()) return;
+
+    const newSubject: GateSubject = {
+      id: uuidv4(),
+      name: newSubjectName,
+      chapters: [],
+      progress: 0
+    };
+
+    setStudyPlan(prev => ({
+      ...prev,
+      subjects: [...prev.subjects, newSubject]
+    }));
+    
+    setNewSubjectName('');
+  };
+
+  const handleDeleteSubject = (subjectId: string) => {
+    setStudyPlan(prev => ({
+      ...prev,
+      subjects: prev.subjects.filter(subject => subject.id !== subjectId)
+    }));
+  };
+
+  const updateSubject = (updatedSubject: GateSubject) => {
+    setStudyPlan(prev => ({
+      ...prev,
+      subjects: prev.subjects.map(subject => 
+        subject.id === updatedSubject.id ? updatedSubject : subject
+      ),
+      progress: calculateOverallProgress([
+        ...prev.subjects.filter(s => s.id !== updatedSubject.id),
+        updatedSubject
+      ])
+    }));
+  };
+
+  const calculateOverallProgress = (subjects: GateSubject[]) => {
+    if (!subjects.length) return 0;
+    return subjects.reduce((sum, subject) => sum + subject.progress, 0) / subjects.length;
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleAddSubject();
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Subjects</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Enter subject name..."
+            value={newSubjectName}
+            onChange={(e) => setNewSubjectName(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="flex-1"
+          />
+          <Button onClick={handleAddSubject} disabled={!newSubjectName.trim()}>
+            <Plus className="h-4 w-4 mr-2" /> Add Subject
+          </Button>
+        </div>
+        
+        {subjects.length === 0 ? (
+          <Alert>
+            <AlertDescription>
+              No subjects added yet. Add your first GATE subject using the input above.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <div className="space-y-4">
+            {subjects.map((subject) => (
+              <GateSubjectItem 
+                key={subject.id} 
+                subject={subject} 
+                updateSubject={updateSubject}
+                onDelete={() => handleDeleteSubject(subject.id)}
+              />
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
