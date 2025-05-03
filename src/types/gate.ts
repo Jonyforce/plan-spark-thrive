@@ -26,4 +26,9 @@ export interface GateStudyPlan {
   description?: string;
   subjects: GateSubject[];
   progress: number; // 0-100
+  type: "study";
+  status: "not-started" | "in-progress" | "completed";
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
 }

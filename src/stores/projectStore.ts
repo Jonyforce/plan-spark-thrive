@@ -2,18 +2,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Project, ProjectOrStudy, StudyPlan } from '@/types/project';
+import { GateStudyPlan } from '@/types/gate';
 
 interface ProjectStoreState {
   projects: Project[];
-  studies: StudyPlan[];
+  studies: (StudyPlan | GateStudyPlan)[];
   addProject: (project: Project) => void;
-  addStudy: (study: StudyPlan) => void;
+  addStudy: (study: StudyPlan | GateStudyPlan) => void;
   updateProject: (id: string, updatedData: Partial<Project>) => void;
-  updateStudy: (id: string, updatedData: Partial<StudyPlan>) => void;
+  updateStudy: (id: string, updatedData: Partial<StudyPlan | GateStudyPlan>) => void;
   removeProject: (id: string) => void;
   removeStudy: (id: string) => void;
   getProjectById: (id: string) => Project | undefined;
-  getStudyById: (id: string) => StudyPlan | undefined;
+  getStudyById: (id: string) => (StudyPlan | GateStudyPlan) | undefined;
 }
 
 export const useProjectStore = create<ProjectStoreState>()(

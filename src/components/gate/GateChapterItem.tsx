@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent } from '@/components/ui/card';
@@ -66,7 +67,7 @@ export const GateChapterItem: React.FC<GateChapterItemProps> = ({
   const calculateProgress = (lectures: GateLecture[]) => {
     if (lectures.length === 0) return 0;
     const completedCount = lectures.filter(lecture => lecture.completed).length;
-    return (completedCount / lectures.length) * 100;
+    return Math.round((completedCount / lectures.length) * 100);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

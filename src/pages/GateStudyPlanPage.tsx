@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { GateSubjectList } from '@/components/gate/GateSubjectList';
+import { GateStudyPlan, GateSubject } from '@/types/gate';
+import { GateImportModal } from '@/components/gate/GateImportModal';
 
 const GateStudyPlanPage = () => {
   const navigate = useNavigate();
@@ -16,12 +18,12 @@ const GateStudyPlanPage = () => {
   const { id } = useParams<{ id?: string }>();
   const { getStudyById, addStudy, updateStudy } = useProjectStore();
   
-  const [studyPlan, setStudyPlan] = useState({
+  const [studyPlan, setStudyPlan] = useState<GateStudyPlan>({
     id: id || uuidv4(),
     name: '',
     description: '',
-    type: 'study' as const,
-    status: 'not-started' as const,
+    type: 'study',
+    status: 'not-started',
     progress: 0,
     tags: ['GATE', 'exam'],
     subjects: [],
@@ -33,10 +35,17 @@ const GateStudyPlanPage = () => {
     if (id) {
       const existingPlan = getStudyById(id);
       if (existingPlan) {
-        setStudyPlan(existingPlan);
+        setStudyPlan(existingPlan as GateStudyPlan);
       }
     }
   }, [id, getStudyById]);
+
+  const handleImport = (subjects: GateSubject[]) => {
+    setStudyPlan(prev => ({
+      ...prev,
+      subjects: [...prev.subjects, ...subjects]
+    }));
+  };
 
   const handleSave = () => {
     const updatedPlan = {
@@ -73,6 +82,7 @@ const GateStudyPlanPage = () => {
               {id ? 'Edit GATE Study Plan' : 'Create GATE Study Plan'}
             </h1>
           </div>
+          <GateImportModal onImport={handleImport} />
         </div>
 
         <div className="space-y-8">

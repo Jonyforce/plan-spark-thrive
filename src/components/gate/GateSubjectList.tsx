@@ -6,13 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus } from 'lucide-react';
 import { GateSubjectItem } from './GateSubjectItem';
-import { GateSubject } from '@/types/gate';
-import { StudyPlan } from '@/types/project';
+import { GateSubject, GateStudyPlan } from '@/types/gate';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface GateSubjectListProps {
-  subjects: any[];
-  setStudyPlan: React.Dispatch<React.SetStateAction<StudyPlan>>;
+  subjects: GateSubject[];
+  setStudyPlan: React.Dispatch<React.SetStateAction<GateStudyPlan>>;
 }
 
 export const GateSubjectList: React.FC<GateSubjectListProps> = ({ subjects = [], setStudyPlan }) => {

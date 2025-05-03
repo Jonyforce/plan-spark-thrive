@@ -4,11 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { StudyPlan } from '@/types/project';
+import { GateStudyPlan } from '@/types/gate';
 
 interface GateStudyFormProps {
-  studyPlan: StudyPlan;
-  setStudyPlan: React.Dispatch<React.SetStateAction<StudyPlan>>;
+  studyPlan: GateStudyPlan;
+  setStudyPlan: React.Dispatch<React.SetStateAction<GateStudyPlan>>;
 }
 
 export const GateStudyForm: React.FC<GateStudyFormProps> = ({ studyPlan, setStudyPlan }) => {
