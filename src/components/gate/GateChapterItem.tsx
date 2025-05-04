@@ -3,22 +3,23 @@ import React, { useState } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { GateChapter, GateLecture } from '@/types/gate';
 import { GateLectureItem } from './GateLectureItem';
-import { ChevronDown, ChevronRight, Trash } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface GateChapterItemProps {
   chapter: GateChapter;
   updateChapter: (updatedChapter: GateChapter) => void;
   readOnly?: boolean;
+  onDelete?: () => void;
 }
 
 export const GateChapterItem: React.FC<GateChapterItemProps> = ({
   chapter,
   updateChapter,
-  readOnly = false
+  readOnly = false,
+  onDelete
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -28,8 +29,6 @@ export const GateChapterItem: React.FC<GateChapterItemProps> = ({
     const newLecture: GateLecture = {
       id: uuidv4(),
       name: 'New Lecture',
-      status: 'not-started',
-      progress: 0,
       minutesToComplete: 30,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -64,12 +63,9 @@ export const GateChapterItem: React.FC<GateChapterItemProps> = ({
   const calculateChapterProgress = (): number => {
     if (chapter.lectures.length === 0) return 0;
     
-    const totalProgress = chapter.lectures.reduce((sum, lecture) => {
-      if (lecture.status === 'completed') return sum + 100;
-      return sum + lecture.progress;
-    }, 0);
-    
-    return Math.round(totalProgress / chapter.lectures.length);
+    // Since GateLecture doesn't have progress or status properties,
+    // we'll return the chapter's progress directly
+    return chapter.progress;
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {

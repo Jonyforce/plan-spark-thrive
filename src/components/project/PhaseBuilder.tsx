@@ -88,25 +88,25 @@ export const PhaseBuilder: React.FC<PhaseBuilderProps> = ({
 
   return (
     <Card>
-      <CardHeader className="px-4 py-3 bg-muted/50">
-        <div className="flex items-center justify-between">
-          <CollapsibleTrigger 
-            onClick={() => setIsOpen(!isOpen)} 
-            className="flex items-center hover:text-primary cursor-pointer"
-          >
-            {isOpen ? <ChevronUp className="h-4 w-4 mr-1" /> : <ChevronDown className="h-4 w-4 mr-1" />}
-            <h3 className="font-medium">Phase {phaseNumber}: {phase.name || 'Untitled'}</h3>
-          </CollapsibleTrigger>
-          
-          {isDeleteAllowed && (
-            <Button variant="ghost" size="icon" onClick={onDelete} className="text-destructive h-8 w-8">
-              <Trash className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-      
       <Collapsible open={isOpen}>
+        <CardHeader className="px-4 py-3 bg-muted/50">
+          <div className="flex items-center justify-between">
+            <CollapsibleTrigger 
+              onClick={() => setIsOpen(!isOpen)} 
+              className="flex items-center hover:text-primary cursor-pointer"
+            >
+              {isOpen ? <ChevronUp className="h-4 w-4 mr-1" /> : <ChevronDown className="h-4 w-4 mr-1" />}
+              <h3 className="font-medium">Phase {phaseNumber}: {phase.name || 'Untitled'}</h3>
+            </CollapsibleTrigger>
+            
+            {isDeleteAllowed && (
+              <Button variant="ghost" size="icon" onClick={onDelete} className="text-destructive h-8 w-8">
+                <Trash className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        
         <CollapsibleContent>
           <CardContent className="pt-4 space-y-4">
             <div className="space-y-2">

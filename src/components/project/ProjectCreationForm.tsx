@@ -109,7 +109,9 @@ export const ProjectCreationForm: React.FC = () => {
 
   const handleImportSubmit = (importedData: ProjectOrStudy) => {
     if (importedData.type === 'project') {
-      addProject(importedData as Project);
+      // Type assertion to Project since we've checked the type is 'project'
+      const project = importedData as Project;
+      addProject(project);
       toast({
         title: "Project Imported",
         description: `Successfully imported project "${importedData.name}"`,
