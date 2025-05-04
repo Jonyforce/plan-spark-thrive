@@ -40,7 +40,7 @@ export const useProjectStore = create<ProjectStoreState>()(
       updateStudy: (id, updatedData) => set((state) => ({
         studies: state.studies.map((study) => 
           study.id === id ? { ...study, ...updatedData } : study
-        )
+        ) as (StudyPlan | GateStudyPlan)[]
       })),
       
       removeProject: (id) => set((state) => ({
