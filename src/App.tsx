@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import ProjectsPage from "./pages/ProjectsPage";
 import StudiesPage from "./pages/StudiesPage";
 import CreateStudyPage from "./pages/CreateStudyPage";
+import CreateProjectPage from "./pages/CreateProjectPage";
 import ImportPage from "./pages/ImportPage";
 import NotFound from "./pages/NotFound";
 import GateStudyPlanPage from "./pages/GateStudyPlanPage";
@@ -25,6 +26,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/projects/new" element={<CreateProjectPage />} />
           <Route path="/studies" element={<StudiesPage />} />
           <Route path="/studies/new" element={<CreateStudyPage />} />
           <Route path="/gate-study" element={<GateStudyPlanPage />} />
