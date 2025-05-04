@@ -10,7 +10,8 @@ export const parseGateJsonData = (jsonData: Record<string, Record<string, number
       const lectures: GateLecture[] = Array.from({ length: lectureCount }, (_, i) => ({
         id: uuidv4(),
         name: `Lecture ${i + 1}`,
-        completed: false
+        completed: false,
+        updatedAt: now
       }));
       
       return {

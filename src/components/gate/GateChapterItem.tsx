@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { GateChapter, GateLecture } from '@/types/gate';
 import { GateLectureItem } from './GateLectureItem';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trash } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface GateChapterItemProps {
