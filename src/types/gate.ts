@@ -4,6 +4,7 @@ export interface GateLecture {
   name: string;
   completed: boolean;
   notes?: string;
+  updatedAt: string;
 }
 
 export interface GateChapter {

@@ -24,7 +24,8 @@ export const GateLectureItem: React.FC<GateLectureItemProps> = ({
     
     updateLecture({
       ...lecture,
-      completed: !lecture.completed
+      completed: !lecture.completed,
+      updatedAt: new Date().toISOString()
     });
   };
 

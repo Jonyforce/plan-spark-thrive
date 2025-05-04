@@ -4,17 +4,19 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProjectStore } from '@/stores/projectStore';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit } from 'lucide-react';
+import { ArrowLeft, Edit, BookOpenCheck } from 'lucide-react';
 import { GateStudyPlan } from '@/types/gate';
 import { GateSubjectList } from '@/components/gate/GateSubjectList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProgressBar } from '@/components/project/ProgressBar';
 import { formatDistance } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 const GateStudyViewPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { id } = useParams<{ id: string }>();
-  const { getStudyById } = useProjectStore();
+  const { getStudyById, updateStudy } = useProjectStore();
   const [studyPlan, setStudyPlan] = useState<GateStudyPlan | null>(null);
 
   useEffect(() => {
@@ -27,6 +29,18 @@ const GateStudyViewPage = () => {
       }
     }
   }, [id, getStudyById, navigate]);
+
+  const handleUpdateStudyPlan = (updatedPlan: GateStudyPlan) => {
+    if (id) {
+      updateStudy(id, updatedPlan);
+      setStudyPlan(updatedPlan);
+      
+      toast({
+        title: "Progress updated",
+        description: "Your study progress has been saved successfully",
+      });
+    }
+  };
 
   if (!studyPlan) {
     return null;
@@ -66,10 +80,16 @@ const GateStudyViewPage = () => {
               </p>
             </div>
           </div>
-          <Button onClick={() => navigate(`/gate-study/${id}`)}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Plan
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate(`/gate-study/${id}`)}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Plan
+            </Button>
+            <Button className="bg-green-600 hover:bg-green-700">
+              <BookOpenCheck className="mr-2 h-4 w-4" />
+              Continue Learning
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -111,8 +131,8 @@ const GateStudyViewPage = () => {
 
           <GateSubjectList 
             subjects={studyPlan.subjects} 
-            setStudyPlan={setStudyPlan as React.Dispatch<React.SetStateAction<GateStudyPlan>>}
-            readOnly={true}
+            setStudyPlan={(updatedPlan) => handleUpdateStudyPlan(updatedPlan as GateStudyPlan)}
+            readOnly={false}
           />
         </div>
       </div>

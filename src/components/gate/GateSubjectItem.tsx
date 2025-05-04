@@ -53,11 +53,29 @@ export const GateSubjectItem: React.FC<GateSubjectItemProps> = ({
     if (readOnly) return;
     
     const updatedChapters = subject.chapters.filter(chapter => chapter.id !== chapterId);
+    
+    // Recalculate subject progress based on chapters
+    const progress = calculateSubjectProgress(updatedChapters);
+    const status = determineStatus(progress);
+    
     updateSubject({
       ...subject,
       chapters: updatedChapters,
+      progress,
+      status,
       updatedAt: new Date().toISOString()
     });
+  };
+
+  const calculateSubjectProgress = (chapters: GateChapter[]): number => {
+    if (chapters.length === 0) return 0;
+    return chapters.reduce((sum, chapter) => sum + (chapter.progress || 0), 0) / chapters.length;
+  };
+
+  const determineStatus = (progress: number): "not-started" | "in-progress" | "completed" => {
+    if (progress === 0) return "not-started";
+    if (progress === 100) return "completed";
+    return "in-progress";
   };
 
   const updateChapter = (updatedChapter: GateChapter) => {
@@ -68,22 +86,15 @@ export const GateSubjectItem: React.FC<GateSubjectItemProps> = ({
     );
     
     // Recalculate subject progress based on chapters
-    const progress = updatedChapters.length 
-      ? updatedChapters.reduce((sum, chapter) => sum + chapter.progress, 0) / updatedChapters.length
-      : 0;
-    
-    const now = new Date().toISOString();
-    // Update the chapter status based on progress
-    const status = progress === 100 ? "completed" : 
-                  progress > 0 ? "in-progress" : 
-                  "not-started";
+    const progress = calculateSubjectProgress(updatedChapters);
+    const status = determineStatus(progress);
       
     updateSubject({
       ...subject,
       chapters: updatedChapters,
       progress,
       status,
-      updatedAt: now
+      updatedAt: new Date().toISOString()
     });
   };
 
