@@ -7,6 +7,7 @@ export interface BaseItem {
   description?: string;
   status: TaskStatus;
   progress: number; // 0-100
+  notes?: string; // Added notes field for user input
   tags?: string[];
   createdAt: string;
   updatedAt: string;

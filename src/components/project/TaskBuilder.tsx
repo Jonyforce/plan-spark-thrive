@@ -5,10 +5,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Task, SubTask } from '@/types/project';
+import { Task, SubTask, TaskStatus } from '@/types/project';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, ChevronUp, Plus, Trash } from 'lucide-react';
 import { SubTaskBuilder } from './SubTaskBuilder';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 interface TaskBuilderProps {
   task: Task;
@@ -37,6 +39,55 @@ export const TaskBuilder: React.FC<TaskBuilderProps> = ({
     onUpdate({
       ...task,
       description: e.target.value,
+      updatedAt: new Date().toISOString()
+    });
+  };
+
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onUpdate({
+      ...task,
+      notes: e.target.value,
+      updatedAt: new Date().toISOString()
+    });
+  };
+
+  const handleStatusChange = (value: TaskStatus) => {
+    let newProgress = task.progress;
+    
+    // Update progress based on status
+    if (value === 'completed') {
+      newProgress = 100;
+    } else if (value === 'in-progress') {
+      newProgress = Math.max(10, newProgress); // At least 10% if in progress
+    } else if (value === 'not-started') {
+      newProgress = 0;
+    }
+    
+    onUpdate({
+      ...task,
+      status: value,
+      progress: newProgress,
+      updatedAt: new Date().toISOString()
+    });
+  };
+
+  const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const progress = parseInt(e.target.value);
+    
+    // Update status based on progress
+    let newStatus = task.status;
+    if (progress === 100) {
+      newStatus = 'completed';
+    } else if (progress > 0) {
+      newStatus = 'in-progress';
+    } else {
+      newStatus = 'not-started';
+    }
+    
+    onUpdate({
+      ...task,
+      progress,
+      status: newStatus,
       updatedAt: new Date().toISOString()
     });
   };
@@ -154,6 +205,57 @@ export const TaskBuilder: React.FC<TaskBuilderProps> = ({
                 rows={1}
                 className="text-xs min-h-[50px]"
               />
+            </div>
+            
+            {/* User Input Section */}
+            <div className="space-y-3 bg-muted/10 p-2 rounded-md border-dashed border">
+              <div className="space-y-1">
+                <label className="text-xs font-medium">Status</label>
+                <RadioGroup
+                  value={task.status}
+                  onValueChange={handleStatusChange as (value: string) => void}
+                  className="flex space-x-2"
+                >
+                  <div className="flex items-center space-x-1">
+                    <RadioGroupItem value="not-started" id={`not-started-${task.id}`} />
+                    <Label htmlFor={`not-started-${task.id}`} className="text-xs">Not Started</Label>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <RadioGroupItem value="in-progress" id={`in-progress-${task.id}`} />
+                    <Label htmlFor={`in-progress-${task.id}`} className="text-xs">In Progress</Label>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <RadioGroupItem value="completed" id={`completed-${task.id}`} />
+                    <Label htmlFor={`completed-${task.id}`} className="text-xs">Completed</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium">Progress ({task.progress}%)</label>
+                </div>
+                <Input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={task.progress}
+                  onChange={handleProgressChange}
+                  className="h-2"
+                />
+              </div>
+              
+              <div className="space-y-1">
+                <label className="text-xs font-medium">Notes (Optional)</label>
+                <Textarea
+                  value={task.notes || ''}
+                  onChange={handleNotesChange}
+                  placeholder="Add your notes, challenges, or achievements"
+                  rows={2}
+                  className="text-xs min-h-[60px]"
+                />
+              </div>
             </div>
             
             <div className="space-y-2">

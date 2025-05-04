@@ -5,11 +5,13 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Phase, Step } from '@/types/project';
+import { Phase, Step, TaskStatus } from '@/types/project';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, ChevronUp, Plus, Trash } from 'lucide-react';
 import { StepBuilder } from './StepBuilder';
 import { calculateProgress } from '@/utils/jsonValidator';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 interface PhaseBuilderProps {
   phase: Phase;
@@ -40,6 +42,55 @@ export const PhaseBuilder: React.FC<PhaseBuilderProps> = ({
     onUpdate({
       ...phase,
       description: e.target.value,
+      updatedAt: new Date().toISOString()
+    });
+  };
+
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onUpdate({
+      ...phase,
+      notes: e.target.value,
+      updatedAt: new Date().toISOString()
+    });
+  };
+
+  const handleStatusChange = (value: TaskStatus) => {
+    let newProgress = phase.progress;
+    
+    // Update progress based on status
+    if (value === 'completed') {
+      newProgress = 100;
+    } else if (value === 'in-progress') {
+      newProgress = Math.max(10, newProgress); // At least 10% if in progress
+    } else if (value === 'not-started') {
+      newProgress = 0;
+    }
+    
+    onUpdate({
+      ...phase,
+      status: value,
+      progress: newProgress,
+      updatedAt: new Date().toISOString()
+    });
+  };
+
+  const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const progress = parseInt(e.target.value);
+    
+    // Update status based on progress
+    let newStatus = phase.status;
+    if (progress === 100) {
+      newStatus = 'completed';
+    } else if (progress > 0) {
+      newStatus = 'in-progress';
+    } else {
+      newStatus = 'not-started';
+    }
+    
+    onUpdate({
+      ...phase,
+      progress,
+      status: newStatus,
       updatedAt: new Date().toISOString()
     });
   };
@@ -126,6 +177,58 @@ export const PhaseBuilder: React.FC<PhaseBuilderProps> = ({
                 placeholder="Enter phase description"
                 rows={2}
               />
+            </div>
+            
+            {/* User Input Section */}
+            <div className="space-y-3 bg-muted/10 p-4 rounded-md border-dashed border">
+              <h4 className="text-sm font-medium">Track Phase Progress</h4>
+              
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Status</label>
+                <RadioGroup
+                  value={phase.status}
+                  onValueChange={handleStatusChange as (value: string) => void}
+                  className="flex space-x-4"
+                >
+                  <div className="flex items-center space-x-1">
+                    <RadioGroupItem value="not-started" id={`not-started-${phase.id}`} />
+                    <Label htmlFor={`not-started-${phase.id}`}>Not Started</Label>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <RadioGroupItem value="in-progress" id={`in-progress-${phase.id}`} />
+                    <Label htmlFor={`in-progress-${phase.id}`}>In Progress</Label>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <RadioGroupItem value="completed" id={`completed-${phase.id}`} />
+                    <Label htmlFor={`completed-${phase.id}`}>Completed</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">Progress ({phase.progress}%)</label>
+                </div>
+                <Input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={phase.progress}
+                  onChange={handleProgressChange}
+                  className="h-2"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Phase Notes (Optional)</label>
+                <Textarea
+                  value={phase.notes || ''}
+                  onChange={handleNotesChange}
+                  placeholder="Add your notes, reflections, or decisions about this phase"
+                  rows={3}
+                />
+              </div>
             </div>
             
             <div className="space-y-4">

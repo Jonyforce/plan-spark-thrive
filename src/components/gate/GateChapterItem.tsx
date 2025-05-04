@@ -29,7 +29,7 @@ export const GateChapterItem: React.FC<GateChapterItemProps> = ({
     const newLecture: GateLecture = {
       id: uuidv4(),
       name: 'New Lecture',
-      minutesToComplete: 30,
+      completed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
