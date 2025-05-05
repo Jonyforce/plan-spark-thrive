@@ -7,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useProjectStore } from '@/stores/projectStore';
-import { ProjectOrStudy, TimeTracking } from '@/types/project';
-import { Play, Pause, Clock, Calendar, TimerOff, Timer, Check, FileText, Link, Square } from 'lucide-react';
+import { ProjectOrStudy, TimeTracking, Project, Task } from '@/types/project';
+import { Play, Pause, Clock, Calendar, TimerOff, Timer, Check, FileText as FileTextIcon, Link as LinkIcon, Square } from 'lucide-react';
 import { format, differenceInMinutes, parseISO } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from '@/hooks/use-toast';
@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 // Update the time tracking page component to fix status type issues
 const TimeTrackingPage: React.FC = () => {
-  const { projects, studies, updateStudy } = useProjectStore();
+  const { projects, studies, updateProject, updateStudy } = useProjectStore();
   const allItems: ProjectOrStudy[] = [...projects, ...studies];
   const { toast } = useToast();
   
@@ -287,18 +287,86 @@ const TimeTrackingPage: React.FC = () => {
     }
   };
 
-  // Function to mark item as completed
+  // Updated function to mark item as completed
   const toggleItemCompletion = (projectId: string, itemId: string, isCompleted: boolean) => {
     const project = allItems.find(p => p.id === projectId);
     if (!project) return;
 
     if ('phases' in project) {
-      // Project type - implementation for projects would go here
-      // This is more complex and would require updating task status
-      toast({
-        title: "Not fully implemented",
-        description: "Marking project tasks as completed from the time tracking page is not yet fully implemented.",
-      });
+      // Project type - Handle project task completion
+      const projectCopy = { ...project } as Project;
+      let taskFound = false;
+      let updatedTask: Task | null = null;
+      let taskPath = "";
+
+      // Find and update the task status
+      for (const phase of projectCopy.phases) {
+        for (const step of phase.steps) {
+          for (let i = 0; i < step.tasks.length; i++) {
+            if (step.tasks[i].id === itemId) {
+              updatedTask = step.tasks[i];
+              step.tasks[i].status = isCompleted ? 'completed' : 'not-started';
+              step.tasks[i].progress = isCompleted ? 100 : 0;
+              step.tasks[i].updatedAt = new Date().toISOString();
+              taskFound = true;
+              taskPath = `${phase.name} > ${step.name} > ${step.tasks[i].name}`;
+              break;
+            }
+          }
+          if (taskFound) break;
+        }
+        if (taskFound) break;
+      }
+
+      if (taskFound && updatedTask) {
+        // Recalculate progress for each level
+        for (const phase of projectCopy.phases) {
+          for (const step of phase.steps) {
+            // Calculate step progress based on tasks
+            const totalTasks = step.tasks.length;
+            if (totalTasks > 0) {
+              const completedTasks = step.tasks.filter(t => t.status === 'completed').length;
+              const inProgressTasks = step.tasks.filter(t => t.status === 'in-progress').length;
+              step.progress = Math.round(((completedTasks * 100) + (inProgressTasks * 50)) / totalTasks);
+              step.status = step.progress === 100 ? 'completed' : (step.progress > 0 ? 'in-progress' : 'not-started');
+              step.updatedAt = new Date().toISOString();
+            }
+          }
+          
+          // Calculate phase progress based on steps
+          const totalSteps = phase.steps.length;
+          if (totalSteps > 0) {
+            const stepsProgress = phase.steps.reduce((sum, s) => sum + s.progress, 0);
+            phase.progress = Math.round(stepsProgress / totalSteps);
+            phase.status = phase.progress === 100 ? 'completed' : (phase.progress > 0 ? 'in-progress' : 'not-started');
+            phase.updatedAt = new Date().toISOString();
+          }
+        }
+        
+        // Calculate project progress based on phases
+        const totalPhases = projectCopy.phases.length;
+        if (totalPhases > 0) {
+          const phasesProgress = projectCopy.phases.reduce((sum, p) => sum + p.progress, 0);
+          projectCopy.progress = Math.round(phasesProgress / totalPhases);
+          projectCopy.status = projectCopy.progress === 100 ? 'completed' : (projectCopy.progress > 0 ? 'in-progress' : 'not-started');
+        }
+        projectCopy.updatedAt = new Date().toISOString();
+        
+        // Update the project
+        updateProject(projectId, projectCopy);
+        
+        // Also update the local projectItems state
+        setProjectItems(prevItems => 
+          prevItems.map(item => 
+            item.id === itemId ? { ...item, completed: isCompleted } : item
+          )
+        );
+
+        toast({
+          title: isCompleted ? "Marked as completed" : "Marked as incomplete",
+          description: `Task "${taskPath}" has been updated`,
+        });
+      }
     } else if ('subjects' in project && project.type === 'study') {
       // GATE study plan
       const gateStudyPlan = project as GateStudyPlan;
@@ -624,7 +692,7 @@ const TimeTrackingPage: React.FC = () => {
                         size="sm"
                         onClick={() => document.getElementById('file-upload')?.click()}
                       >
-                        <FileText className="mr-2 h-4 w-4" />
+                        <FileTextIcon className="mr-2 h-4 w-4" />
                         Attach File
                       </Button>
                       
@@ -640,7 +708,7 @@ const TimeTrackingPage: React.FC = () => {
                           }
                         }}
                       >
-                        <Link className="mr-2 h-4 w-4" />
+                        <LinkIcon className="mr-2 h-4 w-4" />
                         Add Link
                       </Button>
                     </div>
