@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useProjectStore } from '@/stores/projectStore';
 import { ProjectOrStudy, TimeTracking } from '@/types/project';
-import { Play, Pause, Clock, Calendar, TimerOff, Timer, Check } from 'lucide-react';
+import { Play, Pause, Clock, Calendar, TimerOff, Timer, Check, FileText, Link, Square } from 'lucide-react';
 import { format, differenceInMinutes, parseISO } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from '@/hooks/use-toast';
