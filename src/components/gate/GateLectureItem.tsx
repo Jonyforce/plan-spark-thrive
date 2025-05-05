@@ -2,7 +2,7 @@
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Trash } from 'lucide-react';
+import { Trash, Clock } from 'lucide-react';
 import { GateLecture } from '@/types/gate';
 import { cn } from '@/lib/utils';
 
@@ -45,6 +45,12 @@ export const GateLectureItem: React.FC<GateLectureItemProps> = ({
       >
         {lecture.name}
       </span>
+      {lecture.timeSpent !== "00:00:00:00" && (
+        <div className="flex items-center text-xs text-muted-foreground mr-2">
+          <Clock className="h-3 w-3 mr-1" />
+          {lecture.timeSpent}
+        </div>
+      )}
       {!readOnly && (
         <Button
           variant="ghost"

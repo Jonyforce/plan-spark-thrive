@@ -11,6 +11,7 @@ export const parseGateJsonData = (jsonData: Record<string, Record<string, number
         id: uuidv4(),
         name: `Lecture ${i + 1}`,
         completed: false,
+        timeSpent: "00:00:00:00", // Initialize with zero time spent
         updatedAt: now
       }));
       

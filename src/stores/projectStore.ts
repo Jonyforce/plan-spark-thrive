@@ -15,6 +15,7 @@ interface ProjectStoreState {
   removeStudy: (id: string) => void;
   getProjectById: (id: string) => Project | undefined;
   getStudyById: (id: string) => (StudyPlan | GateStudyPlan) | undefined;
+  getAllItems: () => ProjectOrStudy[];
 }
 
 export const useProjectStore = create<ProjectStoreState>()(
@@ -54,6 +55,8 @@ export const useProjectStore = create<ProjectStoreState>()(
       getProjectById: (id) => get().projects.find((project) => project.id === id),
       
       getStudyById: (id) => get().studies.find((study) => study.id === id),
+      
+      getAllItems: () => [...get().projects, ...get().studies]
     }),
     {
       name: 'project-storage',

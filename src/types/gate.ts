@@ -1,9 +1,9 @@
-
 export interface GateLecture {
   id: string;
   name: string;
   completed: boolean;
   notes?: string;
+  timeSpent: string; // Format: "00:00:00:00" (Day:HH:MM:SS)
   updatedAt: string;
 }
 
