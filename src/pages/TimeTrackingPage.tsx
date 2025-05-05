@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -17,6 +16,7 @@ import { GateStudyPlan } from '@/types/gate';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DraggableTimeTracker } from '@/components/time-tracking/DraggableTimeTracker';
 
+// Update the time tracking page component to fix status type issues
 const TimeTrackingPage: React.FC = () => {
   const { projects, studies, updateStudy } = useProjectStore();
   const allItems: ProjectOrStudy[] = [...projects, ...studies];
@@ -290,8 +290,8 @@ const TimeTrackingPage: React.FC = () => {
             const progress = updatedLectures.length > 0 ? 
               (completedCount / updatedLectures.length) * 100 : 0;
             
-            const status = progress === 0 ? "not-started" : 
-                          progress === 100 ? "completed" : "in-progress";
+            const status = progress === 0 ? "not-started" as const : 
+                          progress === 100 ? "completed" as const : "in-progress" as const;
 
             return {
               ...chapter,
@@ -309,8 +309,8 @@ const TimeTrackingPage: React.FC = () => {
         const subjectProgress = updatedChapters.length > 0 ? 
           chapterProgress / updatedChapters.length : 0;
         
-        const subjectStatus = subjectProgress === 0 ? "not-started" : 
-                            subjectProgress === 100 ? "completed" : "in-progress";
+        const subjectStatus = subjectProgress === 0 ? "not-started" as const : 
+                            subjectProgress === 100 ? "completed" as const : "in-progress" as const;
 
         return {
           ...subject,
@@ -326,8 +326,8 @@ const TimeTrackingPage: React.FC = () => {
         const overallProgress = updatedSubjects.reduce((sum, subject) => sum + subject.progress, 0) / 
                                (updatedSubjects.length || 1);
         
-        const overallStatus = overallProgress === 0 ? "not-started" : 
-                             overallProgress === 100 ? "completed" : "in-progress";
+        const overallStatus = overallProgress === 0 ? "not-started" as const : 
+                             overallProgress === 100 ? "completed" as const : "in-progress" as const;
 
         updateStudy(projectId, {
           ...gateStudyPlan,
@@ -462,6 +462,7 @@ const TimeTrackingPage: React.FC = () => {
     return false;
   };
 
+  
   return (
     <AppLayout>
       {activeTracking && (

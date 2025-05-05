@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Stop, Clock } from 'lucide-react';
+import { Play, Pause, Square, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatDistance } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -155,7 +154,7 @@ export const DraggableTimeTracker: React.FC<DraggableTimeTrackerProps> = ({
                 className="flex-1"
                 onClick={onStopTracking}
               >
-                <Stop className="mr-1 h-4 w-4" />
+                <Square className="mr-1 h-4 w-4" />
                 Stop
               </Button>
               {onPauseTracking && (
