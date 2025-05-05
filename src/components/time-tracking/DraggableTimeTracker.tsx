@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Square, Clock } from 'lucide-react';
+import { Play, Pause, Square, Clock, Link, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatDistance } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -11,6 +12,8 @@ interface DraggableTimeTrackerProps {
   startTime: string;
   onStopTracking: () => void;
   onPauseTracking?: () => void;
+  onNotesChange?: (notes: string) => void;
+  notes?: string;
 }
 
 export const DraggableTimeTracker: React.FC<DraggableTimeTrackerProps> = ({
@@ -19,7 +22,9 @@ export const DraggableTimeTracker: React.FC<DraggableTimeTrackerProps> = ({
   projectName,
   startTime,
   onStopTracking,
-  onPauseTracking
+  onPauseTracking,
+  onNotesChange,
+  notes = ''
 }) => {
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isDragging, setIsDragging] = useState(false);
@@ -27,8 +32,20 @@ export const DraggableTimeTracker: React.FC<DraggableTimeTrackerProps> = ({
   const [elapsedTime, setElapsedTime] = useState('');
   const [isExpanded, setIsExpanded] = useState(true);
   const [opacity, setOpacity] = useState(0.9);
+  const [showNotes, setShowNotes] = useState(false);
+  const [noteText, setNoteText] = useState(notes);
+  const [fileLink, setFileLink] = useState('');
+  const [externalLink, setExternalLink] = useState('');
   
   const clockRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Update notes in parent component when text changes
+  useEffect(() => {
+    if (onNotesChange && noteText !== notes) {
+      onNotesChange(noteText);
+    }
+  }, [noteText, notes, onNotesChange]);
 
   // Update elapsed time at regular intervals
   useEffect(() => {
@@ -85,6 +102,34 @@ export const DraggableTimeTracker: React.FC<DraggableTimeTrackerProps> = ({
   // Handle opacity change
   const changeOpacity = () => {
     setOpacity(opacity === 0.9 ? 0.5 : 0.9);
+  };
+
+  // Handle file selection
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Create a local URL for the file to display
+    const fileUrl = URL.createObjectURL(file);
+    const fileName = file.name;
+    
+    // Update notes with file information
+    const fileInfo = `[File: ${fileName}](${fileUrl})`;
+    setNoteText(prev => prev ? `${prev}\n${fileInfo}` : fileInfo);
+    setFileLink(fileUrl);
+  };
+
+  // Handle adding external link
+  const handleAddLink = () => {
+    if (!externalLink) return;
+    
+    const linkInfo = `[Link: ${externalLink}](${externalLink})`;
+    setNoteText(prev => prev ? `${prev}\n${linkInfo}` : linkInfo);
+    setExternalLink('');
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -146,6 +191,65 @@ export const DraggableTimeTracker: React.FC<DraggableTimeTrackerProps> = ({
             
             <div className="text-xs text-gray-300">Elapsed</div>
             <div className="text-xl font-bold">{elapsedTime}</div>
+            
+            {/* Notes toggle button */}
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="w-full border-gray-600 text-gray-300 hover:bg-primary/20 mt-2"
+              onClick={() => setShowNotes(!showNotes)}
+            >
+              {showNotes ? "Hide Notes" : "Show Notes"}
+            </Button>
+            
+            {/* Notes section */}
+            {showNotes && (
+              <div className="space-y-2 pt-2">
+                <textarea 
+                  className="w-full bg-gray-800/50 border border-gray-700 rounded p-2 text-white text-sm resize-none"
+                  rows={3}
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  placeholder="Add notes about this task..."
+                />
+                
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="flex-1 border-gray-600 text-gray-300 hover:bg-primary/20"
+                    onClick={triggerFileInput}
+                  >
+                    <FileText className="mr-1 h-4 w-4" />
+                    File
+                  </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    onChange={handleFileSelect}
+                  />
+                  
+                  <div className="flex flex-1">
+                    <input 
+                      type="text" 
+                      className="flex-1 bg-gray-800/50 border-y border-l border-gray-700 rounded-l p-1 text-white text-xs"
+                      placeholder="URL..."
+                      value={externalLink}
+                      onChange={(e) => setExternalLink(e.target.value)}
+                    />
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      className="border-gray-600 text-gray-300 hover:bg-primary/20 rounded-l-none"
+                      onClick={handleAddLink}
+                    >
+                      <Link className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
             
             <div className="flex space-x-2 pt-1">
               <Button 

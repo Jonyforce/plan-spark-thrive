@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -111,6 +111,17 @@ export const ProjectCreationForm: React.FC = () => {
     if (importedData.type === 'project') {
       // Type assertion to Project since we've checked the type is 'project'
       const project = importedData as Project;
+      
+      // Ensure the imported data has phases
+      if (!('phases' in project)) {
+        toast({
+          title: "Invalid Project Format",
+          description: "The imported data is missing required phases",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       addProject(project);
       toast({
         title: "Project Imported",

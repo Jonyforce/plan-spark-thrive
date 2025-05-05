@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { GateStudyPlan } from '@/types/gate';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DraggableTimeTracker } from '@/components/time-tracking/DraggableTimeTracker';
+import { Textarea } from '@/components/ui/textarea';
 
 // Update the time tracking page component to fix status type issues
 const TimeTrackingPage: React.FC = () => {
@@ -177,6 +179,19 @@ const TimeTrackingPage: React.FC = () => {
       title: "Tracking stopped",
       description: `Tracked for ${durationMinutes} minutes`,
     });
+  };
+
+  // Update notes for active tracking
+  const updateActiveTrackingNotes = (updatedNotes: string) => {
+    if (!activeTracking) return;
+    
+    setActiveTracking({
+      ...activeTracking,
+      notes: updatedNotes
+    });
+    
+    // Also update the notes in the form
+    setNotes(updatedNotes);
   };
 
   // Helper function to format duration in Day:HH:MM:SS format
@@ -461,7 +476,6 @@ const TimeTrackingPage: React.FC = () => {
     
     return false;
   };
-
   
   return (
     <AppLayout>
@@ -471,6 +485,8 @@ const TimeTrackingPage: React.FC = () => {
           projectName={getProjectNameById(activeTracking.projectId)}
           itemName={getItemNameById(activeTracking.projectId, activeTracking.itemId)}
           startTime={activeTracking.startTime}
+          notes={activeTracking.notes}
+          onNotesChange={updateActiveTrackingNotes}
           onStopTracking={stopTracking}
         />
       )}
@@ -509,7 +525,7 @@ const TimeTrackingPage: React.FC = () => {
                   {activeTracking.notes && (
                     <div className="flex flex-col">
                       <span className="text-sm font-medium mb-1">Notes</span>
-                      <span>{activeTracking.notes}</span>
+                      <span className="whitespace-pre-line">{activeTracking.notes}</span>
                     </div>
                   )}
                   <div className="flex flex-col">
@@ -563,12 +579,52 @@ const TimeTrackingPage: React.FC = () => {
 
                   <div className="flex flex-col space-y-1.5 col-span-1 md:col-span-2">
                     <Label htmlFor="notes">Notes (optional)</Label>
-                    <Input
+                    <Textarea
                       id="notes"
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
-                      placeholder="Add any notes about this time entry"
+                      placeholder="Add notes, attach files, or include links to external resources"
+                      className="min-h-[120px]"
                     />
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <input
+                        type="file"
+                        id="file-upload"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const fileInfo = `[File: ${file.name}]`;
+                            setNotes(prev => prev ? `${prev}\n${fileInfo}` : fileInfo);
+                          }
+                        }}
+                      />
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => document.getElementById('file-upload')?.click()}
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        Attach File
+                      </Button>
+                      
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          const link = prompt('Enter URL:');
+                          if (link) {
+                            const linkInfo = `[Link: ${link}](${link})`;
+                            setNotes(prev => prev ? `${prev}\n${linkInfo}` : linkInfo);
+                          }
+                        }}
+                      >
+                        <Link className="mr-2 h-4 w-4" />
+                        Add Link
+                      </Button>
+                    </div>
                   </div>
                 </>
               )}
@@ -577,7 +633,7 @@ const TimeTrackingPage: React.FC = () => {
           <CardFooter className="flex justify-end">
             {activeTracking ? (
               <Button onClick={stopTracking} variant="destructive">
-                <Pause className="mr-2 h-4 w-4" />
+                <Square className="mr-2 h-4 w-4" />
                 Stop Tracking
               </Button>
             ) : (
@@ -632,7 +688,13 @@ const TimeTrackingPage: React.FC = () => {
                           <TableCell>{getItemNameById(entry.projectId, entry.itemId)}</TableCell>
                           <TableCell>{format(parseISO(entry.startTime), 'PP')}</TableCell>
                           <TableCell>{formatDuration(entry.durationMinutes)}</TableCell>
-                          <TableCell>{entry.notes || '-'}</TableCell>
+                          <TableCell>
+                            {entry.notes ? (
+                              <div className="max-h-24 overflow-y-auto whitespace-pre-line text-sm">
+                                {entry.notes}
+                              </div>
+                            ) : '-'}
+                          </TableCell>
                           <TableCell>
                             <Checkbox 
                               checked={isCompleted}
