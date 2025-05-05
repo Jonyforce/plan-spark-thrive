@@ -14,6 +14,8 @@ import NotFound from "./pages/NotFound";
 import GateStudyPlanPage from "./pages/GateStudyPlanPage";
 import GateStudyViewPage from "./pages/GateStudyViewPage";
 import TimeTrackingPage from "./pages/TimeTrackingPage";
+import ProjectViewPage from "./pages/ProjectViewPage";
+import ProjectEditPage from "./pages/ProjectEditPage";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,8 @@ const App = () => (
           <Route path="/" element={<Dashboard />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/projects/new" element={<CreateProjectPage />} />
+          <Route path="/projects/:id/edit" element={<ProjectEditPage />} />
+          <Route path="/projects/:id/view" element={<ProjectViewPage />} />
           <Route path="/studies" element={<StudiesPage />} />
           <Route path="/studies/new" element={<CreateStudyPage />} />
           <Route path="/gate-study" element={<GateStudyPlanPage />} />

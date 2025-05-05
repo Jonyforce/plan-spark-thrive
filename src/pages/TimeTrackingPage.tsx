@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -41,6 +40,26 @@ const TimeTrackingPage: React.FC = () => {
     const activeTrackingData = localStorage.getItem('active-tracking');
     if (activeTrackingData) {
       setActiveTracking(JSON.parse(activeTrackingData));
+    }
+    
+    // Check if we have pre-selected tracking data from other pages
+    const selectedTrackingProject = localStorage.getItem('selected-tracking-project');
+    const selectedTrackingItem = localStorage.getItem('selected-tracking-item');
+    
+    if (selectedTrackingProject) {
+      setSelectedProject(selectedTrackingProject);
+      // Clear the stored value so it's only used once
+      localStorage.removeItem('selected-tracking-project');
+    }
+    
+    if (selectedTrackingItem) {
+      setSelectedItem(selectedTrackingItem);
+      localStorage.removeItem('selected-tracking-item');
+    }
+    
+    const selectedItemName = localStorage.getItem('selected-tracking-item-name');
+    if (selectedItemName) {
+      localStorage.removeItem('selected-tracking-item-name');
     }
   }, []);
 
