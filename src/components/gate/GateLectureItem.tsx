@@ -45,7 +45,7 @@ export const GateLectureItem: React.FC<GateLectureItemProps> = ({
       >
         {lecture.name}
       </span>
-      {lecture.timeSpent !== "00:00:00:00" && (
+      {lecture.timeSpent && lecture.timeSpent !== "00:00:00:00" && (
         <div className="flex items-center text-xs text-muted-foreground mr-2">
           <Clock className="h-3 w-3 mr-1" />
           {lecture.timeSpent}

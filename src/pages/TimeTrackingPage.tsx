@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useToast } from '@/hooks/use-toast';
 import { GateStudyPlan } from '@/types/gate';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DraggableTimeTracker } from '@/components/time-tracking/DraggableTimeTracker';
 
 const TimeTrackingPage: React.FC = () => {
   const { projects, studies, updateStudy } = useProjectStore();
@@ -201,6 +203,14 @@ const TimeTrackingPage: React.FC = () => {
           if (lecture.id === itemId) {
             lectureFound = true;
             // Parse existing timeSpent
+            if (!lecture.timeSpent) {
+              return {
+                ...lecture,
+                timeSpent: formatDurationToDHMS(durationMinutes),
+                updatedAt: new Date().toISOString()
+              };
+            }
+            
             const [days, hours, mins, secs] = lecture.timeSpent.split(':').map(Number);
             const existingMinutes = (days * 24 * 60) + (hours * 60) + mins;
             const totalMinutes = existingMinutes + durationMinutes;
@@ -454,6 +464,16 @@ const TimeTrackingPage: React.FC = () => {
 
   return (
     <AppLayout>
+      {activeTracking && (
+        <DraggableTimeTracker 
+          isTracking={true}
+          projectName={getProjectNameById(activeTracking.projectId)}
+          itemName={getItemNameById(activeTracking.projectId, activeTracking.itemId)}
+          startTime={activeTracking.startTime}
+          onStopTracking={stopTracking}
+        />
+      )}
+      
       <div className="container mx-auto py-6 space-y-8">
         <div className="flex justify-between items-center">
           <div>

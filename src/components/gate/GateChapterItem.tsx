@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
@@ -30,6 +29,7 @@ export const GateChapterItem: React.FC<GateChapterItemProps> = ({
       id: uuidv4(),
       name: 'New Lecture',
       completed: false,
+      timeSpent: "00:00:00:00",
       updatedAt: new Date().toISOString()
     };
 
