@@ -30,9 +30,20 @@ export interface Phase extends BaseItem {
   steps: Step[];
 }
 
+export interface GitHubInfo {
+  repoUrl: string;
+  owner: string;
+  repo: string;
+  lastSynced?: string;
+  commitCount?: number;
+  issueCount?: number;
+  prCount?: number;
+}
+
 export interface Project extends BaseItem {
   phases: Phase[];
   type: 'project' | 'study';
+  github?: GitHubInfo;
 }
 
 export interface StudyTopic extends BaseItem {

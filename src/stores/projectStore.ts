@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Project, ProjectOrStudy, StudyPlan } from '@/types/project';
+import { GitHubInfo, Project, ProjectOrStudy, StudyPlan } from '@/types/project';
 import { GateStudyPlan } from '@/types/gate';
 import { syncProject } from '@/utils/dbSync';
 
@@ -18,6 +18,7 @@ interface ProjectStoreState {
   getStudyById: (id: string) => (StudyPlan | GateStudyPlan) | undefined;
   getAllItems: () => ProjectOrStudy[];
   syncWithDatabase: (id: string) => Promise<boolean>;
+  updateGitHubInfo: (id: string, githubInfo: GitHubInfo) => void;
 }
 
 export const useProjectStore = create<ProjectStoreState>()(
@@ -60,7 +61,26 @@ export const useProjectStore = create<ProjectStoreState>()(
       
       getAllItems: () => [...get().projects, ...get().studies],
       
-      // New function to sync a project or study with the database
+      // New function to update GitHub info
+      updateGitHubInfo: (id, githubInfo) => {
+        const project = get().getProjectById(id);
+        
+        if (project) {
+          const updatedProject = {
+            ...project,
+            github: {
+              ...project.github,
+              ...githubInfo,
+              lastSynced: new Date().toISOString()
+            }
+          };
+          
+          get().updateProject(id, updatedProject);
+          syncProject(updatedProject);
+        }
+      },
+      
+      // Function to sync a project or study with the database
       syncWithDatabase: async (id) => {
         const project = get().getProjectById(id);
         const study = get().getStudyById(id);
