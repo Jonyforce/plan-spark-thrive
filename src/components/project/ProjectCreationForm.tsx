@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { syncProject } from '@/utils/dbSync';
 
 interface ProjectFormInput {
   name: string;
@@ -22,10 +23,11 @@ export const ProjectCreationForm: React.FC = () => {
   const { toast } = useToast();
   const { addProject, getAllItems } = useProjectStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   
   const { register, handleSubmit, formState: { errors } } = useForm<ProjectFormInput>();
   
-  const onSubmit = (data: ProjectFormInput) => {
+  const onSubmit = async (data: ProjectFormInput) => {
     setIsSubmitting(true);
     
     try {
@@ -90,12 +92,18 @@ export const ProjectCreationForm: React.FC = () => {
         ]
       };
       
+      // Add to local store
       addProject(newProject);
       
       toast({
         title: "Project Created",
         description: `Successfully created project "${data.name}"`,
       });
+      
+      // Attempt to sync with database
+      setIsSyncing(true);
+      await syncProject(newProject);
+      setIsSyncing(false);
       
       setIsSubmitting(false);
       navigate(`/projects/${newProject.id}/view`);
@@ -107,6 +115,7 @@ export const ProjectCreationForm: React.FC = () => {
         variant: "destructive"
       });
       setIsSubmitting(false);
+      setIsSyncing(false);
     }
   };
   
@@ -155,8 +164,8 @@ export const ProjectCreationForm: React.FC = () => {
           <Button variant="outline" type="button" onClick={() => navigate('/projects')}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating...' : 'Create Project'}
+          <Button type="submit" disabled={isSubmitting || isSyncing}>
+            {isSubmitting ? 'Creating...' : isSyncing ? 'Syncing...' : 'Create Project'}
           </Button>
         </CardFooter>
       </form>

@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Project, ProjectOrStudy, StudyPlan } from '@/types/project';
 import { GateStudyPlan } from '@/types/gate';
+import { syncProject } from '@/utils/dbSync';
 
 interface ProjectStoreState {
   projects: Project[];
@@ -16,6 +17,7 @@ interface ProjectStoreState {
   getProjectById: (id: string) => Project | undefined;
   getStudyById: (id: string) => (StudyPlan | GateStudyPlan) | undefined;
   getAllItems: () => ProjectOrStudy[];
+  syncWithDatabase: (id: string) => Promise<boolean>;
 }
 
 export const useProjectStore = create<ProjectStoreState>()(
@@ -56,7 +58,21 @@ export const useProjectStore = create<ProjectStoreState>()(
       
       getStudyById: (id) => get().studies.find((study) => study.id === id),
       
-      getAllItems: () => [...get().projects, ...get().studies]
+      getAllItems: () => [...get().projects, ...get().studies],
+      
+      // New function to sync a project or study with the database
+      syncWithDatabase: async (id) => {
+        const project = get().getProjectById(id);
+        const study = get().getStudyById(id);
+        
+        if (project) {
+          return await syncProject(project);
+        } else if (study) {
+          return await syncProject(study);
+        }
+        
+        return false;
+      }
     }),
     {
       name: 'project-storage',
