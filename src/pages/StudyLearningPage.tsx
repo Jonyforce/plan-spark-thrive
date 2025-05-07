@@ -1,17 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useProjectStore } from '@/stores/projectStore';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CheckCircle, XCircle, Lightbulb, BookOpen, Clock } from 'lucide-react';
-import { GateStudyPlan, GateChapter, GateLecture } from '@/types/gate';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, BookCheck, BookOpen, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { GateChapter, GateStudyPlan, GateLecture } from '@/types/gate';
+import { StudyPlan, StudyChapter, TaskStatus } from '@/types/project';
 import { useToast } from '@/hooks/use-toast';
-import { v4 as uuidv4 } from 'uuid';
+import { recordLearningRetention } from '@/utils/dbSync';
 
 const StudyLearningPage = () => {
   const navigate = useNavigate();
@@ -19,385 +18,248 @@ const StudyLearningPage = () => {
   const { id, subjectId, chapterId } = useParams<{ id: string; subjectId: string; chapterId: string }>();
   const { getStudyById, updateStudy } = useProjectStore();
   
-  const [studyPlan, setStudyPlan] = useState<GateStudyPlan | null>(null);
-  const [currentSubject, setCurrentSubject] = useState<any>(null);
+  // State for the current study
+  const [studyPlan, setStudyPlan] = useState<GateStudyPlan | StudyPlan | null>(null);
   const [currentChapter, setCurrentChapter] = useState<GateChapter | null>(null);
+  const [currentSubject, setCurrentSubject] = useState<any>(null);
   const [currentLectureIndex, setCurrentLectureIndex] = useState(0);
-  const [notes, setNotes] = useState('');
-  const [elapsedTime, setElapsedTime] = useState('00:00:00');
-  const [startTime, setStartTime] = useState<number | null>(null);
+  const [notes, setNotes] = useState("");
+  
+  // Check if the plan is a GateStudyPlan by checking for subjects property
+  const isGateStudyPlan = (plan: any): plan is GateStudyPlan => {
+    return 'subjects' in plan;
+  };
 
+  // Load the study plan and find the current chapter
   useEffect(() => {
-    if (id) {
+    if (id && subjectId && chapterId) {
       const plan = getStudyById(id);
-      if (plan && 'subjects' in plan) {
-        setStudyPlan(plan as GateStudyPlan);
+      
+      if (plan) {
+        setStudyPlan(plan);
         
-        // Find the current subject and chapter
-        if (subjectId && chapterId) {
+        if (isGateStudyPlan(plan)) {
           const subject = plan.subjects.find(s => s.id === subjectId);
           if (subject) {
             setCurrentSubject(subject);
             const chapter = subject.chapters.find(c => c.id === chapterId);
             if (chapter) {
-              setCurrentChapter(chapter);
-              // Initialize notes if available
-              if (chapter.lectures && chapter.lectures.length > 0 && chapter.lectures[0].notes) {
-                setNotes(chapter.lectures[0].notes);
-              }
-            } else {
-              toast({
-                title: 'Chapter not found',
-                description: 'The specified chapter could not be found in this study plan.',
-                variant: 'destructive',
-              });
-              navigate(`/studies/${id}`);
+              setCurrentChapter(chapter as GateChapter);
             }
-          } else {
-            toast({
-              title: 'Subject not found',
-              description: 'The specified subject could not be found in this study plan.',
-              variant: 'destructive',
-            });
-            navigate(`/studies/${id}`);
           }
         }
-      } else {
-        navigate('/studies');
       }
     }
-    
-    // Start the timer when the component mounts
-    setStartTime(Date.now());
-    const timer = setInterval(() => {
-      if (startTime) {
-        const seconds = Math.floor((Date.now() - startTime) / 1000);
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const remainingSeconds = seconds % 60;
-        
-        setElapsedTime(
-          `${hours.toString().padStart(2, '0')}:${minutes
-            .toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
-        );
-      }
-    }, 1000);
-    
-    return () => clearInterval(timer);
-  }, [id, subjectId, chapterId, getStudyById, navigate, toast, startTime]);
+  }, [id, subjectId, chapterId, getStudyById]);
 
-  const saveProgress = () => {
-    if (!studyPlan || !currentSubject || !currentChapter) return;
-    
-    // Calculate elapsed time since start
-    const timeSpent = elapsedTime;
-    
-    // Update the current lecture
-    const updatedLectures = [...currentChapter.lectures];
-    
-    // Create lecture if it doesn't exist
-    if (currentLectureIndex >= updatedLectures.length) {
-      updatedLectures.push({
-        id: uuidv4(),
-        name: `Lecture ${currentLectureIndex + 1}`,
-        completed: false,
-        timeSpent: '00:00:00',
-        updatedAt: new Date().toISOString()
-      });
-    }
-    
-    // Update current lecture
-    updatedLectures[currentLectureIndex] = {
-      ...updatedLectures[currentLectureIndex],
-      notes: notes,
-      timeSpent: timeSpent,
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Update chapter
-    const updatedChapters = currentSubject.chapters.map(chapter => 
-      chapter.id === currentChapter.id 
-        ? { ...chapter, lectures: updatedLectures, status: 'in-progress' } 
-        : chapter
-    );
-    
-    // Update subject
-    const updatedSubjects = studyPlan.subjects.map(subject => 
-      subject.id === currentSubject.id 
-        ? { ...subject, chapters: updatedChapters, status: 'in-progress' } 
-        : subject
-    );
-    
-    // Calculate new progress
-    const updatedStudyPlan = {
-      ...studyPlan,
-      subjects: updatedSubjects,
-      status: 'in-progress',
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Update the study plan
-    if (id) {
-      updateStudy(id, updatedStudyPlan);
-      setStudyPlan(updatedStudyPlan);
-      
-      toast({
-        title: 'Progress saved',
-        description: 'Your study progress has been saved successfully.',
-      });
-    }
-  };
-
-  const markLectureComplete = (complete: boolean) => {
-    if (!currentChapter || !currentLectureIndex) return;
-    
-    const updatedLectures = [...currentChapter.lectures];
-    
-    // Create lecture if it doesn't exist
-    if (currentLectureIndex >= updatedLectures.length) {
-      updatedLectures.push({
-        id: uuidv4(),
-        name: `Lecture ${currentLectureIndex + 1}`,
-        completed: complete,
-        timeSpent: elapsedTime,
-        notes: notes,
-        updatedAt: new Date().toISOString()
-      });
-    } else {
-      // Update existing lecture
-      updatedLectures[currentLectureIndex] = {
-        ...updatedLectures[currentLectureIndex],
-        completed: complete,
-        timeSpent: elapsedTime,
-        notes: notes,
-        updatedAt: new Date().toISOString()
-      };
-    }
-    
-    // Check if all lectures are completed
-    const allCompleted = updatedLectures.every(lecture => lecture.completed);
-    
-    // Update the study plan
-    if (studyPlan && currentSubject) {
-      // Update chapter
-      const updatedChapters = currentSubject.chapters.map(chapter => 
-        chapter.id === currentChapter.id 
-          ? { 
-              ...chapter, 
-              lectures: updatedLectures, 
-              status: allCompleted ? 'completed' : 'in-progress',
-              progress: Math.round((updatedLectures.filter(l => l.completed).length / updatedLectures.length) * 100)
-            } 
-          : chapter
-      );
-      
-      // Check if all chapters are completed
-      const allChaptersCompleted = updatedChapters.every(chapter => chapter.status === 'completed');
-      
-      // Update subject
-      const updatedSubjects = studyPlan.subjects.map(subject => 
-        subject.id === currentSubject.id 
-          ? { 
-              ...subject, 
-              chapters: updatedChapters, 
-              status: allChaptersCompleted ? 'completed' : 'in-progress',
-              progress: Math.round((updatedChapters.reduce((acc, chapter) => acc + chapter.progress, 0) / updatedChapters.length))
-            } 
-          : subject
-      );
-      
-      // Check if all subjects are completed
-      const allSubjectsCompleted = updatedSubjects.every(subject => subject.status === 'completed');
-      
-      // Calculate new overall progress
-      const overallProgress = Math.round((updatedSubjects.reduce((acc, subject) => acc + subject.progress, 0) / updatedSubjects.length));
-      
-      // Update the study plan
-      const updatedStudyPlan = {
-        ...studyPlan,
-        subjects: updatedSubjects,
-        status: allSubjectsCompleted ? 'completed' : 'in-progress',
-        progress: overallProgress,
-        updatedAt: new Date().toISOString()
-      };
-      
-      if (id) {
-        updateStudy(id, updatedStudyPlan);
-        setStudyPlan(updatedStudyPlan);
-        
-        toast({
-          title: complete ? 'Lecture completed' : 'Lecture marked as incomplete',
-          description: complete ? 'Great job! Your progress has been updated.' : 'Lecture status updated.',
-        });
-        
-        // Move to next lecture if completed
-        if (complete && currentLectureIndex < updatedLectures.length - 1) {
-          setCurrentLectureIndex(currentLectureIndex + 1);
-          setNotes(updatedLectures[currentLectureIndex + 1]?.notes || '');
-        }
-      }
-    }
-  };
-
-  // Get current lecture
-  const currentLecture = currentChapter?.lectures?.[currentLectureIndex] || null;
-
-  if (!studyPlan || !currentSubject || !currentChapter) {
+  // If no data is loaded yet, show a loading state
+  if (!studyPlan || !currentChapter || !currentSubject) {
     return (
       <AppLayout>
-        <div className="flex justify-center items-center h-[calc(100vh-200px)]">
-          <p>Loading study content...</p>
+        <div className="flex items-center justify-center h-full">
+          <p className="text-muted-foreground">Loading content...</p>
         </div>
       </AppLayout>
     );
   }
 
+  // Get the current lecture (GateStudyPlan) or use chapter content for StudyPlan
+  const currentLecture = 'lectures' in currentChapter ? 
+    currentChapter.lectures[currentLectureIndex] : null;
+
+  // Handle navigation between lectures
+  const goToNextLecture = () => {
+    if ('lectures' in currentChapter && currentLectureIndex < currentChapter.lectures.length - 1) {
+      setCurrentLectureIndex(currentLectureIndex + 1);
+    } else {
+      // Mark chapter as completed when reaching the end
+      handleCompleteChapter();
+    }
+  };
+
+  const goToPrevLecture = () => {
+    if (currentLectureIndex > 0) {
+      setCurrentLectureIndex(currentLectureIndex - 1);
+    }
+  };
+
+  // Handle marking a chapter as completed
+  const handleCompleteChapter = () => {
+    if (!studyPlan || !currentSubject || !currentChapter) return;
+
+    if (isGateStudyPlan(studyPlan)) {
+      // Create a deep copy of the study plan
+      const updatedPlan = JSON.parse(JSON.stringify(studyPlan)) as GateStudyPlan;
+      
+      // Find and update the chapter
+      const subjectIndex = updatedPlan.subjects.findIndex(s => s.id === subjectId);
+      if (subjectIndex >= 0) {
+        const chapterIndex = updatedPlan.subjects[subjectIndex].chapters.findIndex(c => c.id === chapterId);
+        if (chapterIndex >= 0) {
+          // Mark chapter as completed
+          updatedPlan.subjects[subjectIndex].chapters[chapterIndex].status = 'completed' as TaskStatus;
+          updatedPlan.subjects[subjectIndex].chapters[chapterIndex].progress = 100;
+          
+          // Check if all chapters in the subject are completed, if so mark subject as completed
+          const allChaptersCompleted = updatedPlan.subjects[subjectIndex].chapters.every(c => c.status === 'completed');
+          if (allChaptersCompleted) {
+            updatedPlan.subjects[subjectIndex].status = 'completed' as TaskStatus;
+            updatedPlan.subjects[subjectIndex].progress = 100;
+          } else {
+            // Update subject progress
+            const totalProgress = updatedPlan.subjects[subjectIndex].chapters
+              .reduce((sum, chapter) => sum + chapter.progress, 0);
+            const avgProgress = totalProgress / updatedPlan.subjects[subjectIndex].chapters.length;
+            updatedPlan.subjects[subjectIndex].progress = avgProgress;
+            updatedPlan.subjects[subjectIndex].status = 'in-progress' as TaskStatus;
+          }
+          
+          // Update overall study plan progress
+          const totalSubjectsProgress = updatedPlan.subjects
+            .reduce((sum, subject) => sum + subject.progress, 0);
+          updatedPlan.progress = totalSubjectsProgress / updatedPlan.subjects.length;
+          
+          // Check if all subjects are completed
+          const allSubjectsCompleted = updatedPlan.subjects.every(s => s.status === 'completed');
+          if (allSubjectsCompleted) {
+            updatedPlan.status = 'completed' as TaskStatus;
+          } else {
+            updatedPlan.status = 'in-progress' as TaskStatus;
+          }
+          
+          updatedPlan.updatedAt = new Date().toISOString();
+          
+          // Update the study plan in the store
+          updateStudy(id!, updatedPlan);
+          setStudyPlan(updatedPlan);
+
+          // Record learning retention for this chapter
+          const confidenceLevel = 3; // Medium confidence by default
+          recordLearningRetention(
+            chapterId as string,
+            updatedPlan.subjects[subjectIndex].chapters[chapterIndex].name,
+            confidenceLevel
+          );
+          
+          toast({
+            title: "Chapter completed",
+            description: "Your progress has been updated",
+          });
+        }
+      }
+    }
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => {
-              saveProgress();
-              navigate(`/studies/${id}`);
-            }}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">{currentSubject.name}</h1>
-              <p className="text-muted-foreground">
-                Chapter: {currentChapter.name}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center">
-              <Clock className="h-5 w-5 mr-2 text-muted-foreground" />
-              <span className="text-sm font-mono">{elapsedTime}</span>
-            </div>
-            <Button onClick={saveProgress} variant="outline">Save Progress</Button>
-          </div>
+          <Button variant="ghost" onClick={() => navigate(`/studies/${id}`)}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Study Plan
+          </Button>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left sidebar - Chapter progress */}
-          <div className="md:col-span-1 space-y-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Chapter Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>Progress</span>
-                      <span>{currentChapter.progress || 0}%</span>
-                    </div>
-                    <Progress value={currentChapter.progress || 0} />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium">Lectures</h3>
-                    <div className="space-y-1">
-                      {currentChapter.lectures && currentChapter.lectures.length > 0 ? (
-                        currentChapter.lectures.map((lecture, index) => (
-                          <Button
-                            key={lecture.id}
-                            variant={currentLectureIndex === index ? "default" : "outline"}
-                            className="w-full justify-start text-left"
-                            onClick={() => {
-                              saveProgress();
-                              setCurrentLectureIndex(index);
-                              setNotes(lecture.notes || '');
-                            }}
-                          >
-                            <div className="flex items-center w-full">
-                              <span className="mr-2">{index + 1}.</span>
-                              <span className="flex-1 truncate">{lecture.name}</span>
-                              {lecture.completed && <CheckCircle className="h-4 w-4 ml-2 text-green-500" />}
-                            </div>
-                          </Button>
-                        ))
-                      ) : (
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start text-left"
-                        >
-                          <div className="flex items-center w-full">
-                            <span className="mr-2">1.</span>
-                            <span className="flex-1 truncate">Lecture 1</span>
-                          </div>
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+        
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* Sidebar with chapter info */}
+          <Card className="md:col-span-1">
+            <CardHeader>
+              <CardTitle>Study Progress</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h3 className="font-medium mb-1">{currentSubject.name}</h3>
+                <div className="text-sm text-muted-foreground">
+                  Chapter: {currentChapter.name}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main content */}
-          <div className="md:col-span-2 space-y-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">
-                  {currentLecture?.name || `Lecture ${currentLectureIndex + 1}`}
+                {('lectures' in currentChapter && currentChapter.lectures.length > 0) && (
+                  <div className="text-sm text-muted-foreground mt-2">
+                    Lecture {currentLectureIndex + 1} of {currentChapter.lectures.length}
+                  </div>
+                )}
+              </div>
+              
+              <Button 
+                className="w-full bg-green-600 hover:bg-green-700"
+                onClick={handleCompleteChapter}
+              >
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Mark as Completed
+              </Button>
+            </CardContent>
+          </Card>
+          
+          {/* Main content area */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>
+                  {currentLecture ? currentLecture.title : currentChapter.name}
                 </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Tabs defaultValue="notes" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="notes">Notes</TabsTrigger>
-                    <TabsTrigger value="insights">Insights</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="notes" className="space-y-4 pt-4">
-                    <Textarea
-                      placeholder="Take your notes here..."
-                      className="min-h-[300px]"
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                    />
-                  </TabsContent>
-                  <TabsContent value="insights" className="space-y-4 pt-4">
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <div className="flex items-center">
-                          <Lightbulb className="mr-2 h-5 w-5 text-yellow-500" />
-                          <CardTitle className="text-lg">Learning Tips</CardTitle>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="list-disc pl-5 space-y-2">
-                          <li>Break down complex topics into smaller, manageable parts.</li>
-                          <li>Use active recall by testing yourself on what you've learned.</li>
-                          <li>Explain concepts in your own words to deepen understanding.</li>
-                          <li>Connect new information to topics you already know.</li>
-                          <li>Take regular breaks to improve focus and retention.</li>
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button
-                  variant="outline"
-                  onClick={() => markLectureComplete(false)}
-                  className="flex items-center"
-                >
-                  <XCircle className="mr-2 h-4 w-4" />
-                  Mark Incomplete
-                </Button>
-                <Button
-                  onClick={() => markLectureComplete(true)}
-                  className="bg-green-600 hover:bg-green-700 flex items-center"
-                >
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  Mark Complete
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Display lecture content or chapter content */}
+              <div className="prose max-w-none">
+                <div className="min-h-[200px] p-4 border rounded-md bg-gray-50">
+                  {currentLecture ? (
+                    <div>
+                      {currentLecture.content.split('\n').map((paragraph, i) => (
+                        <p key={i}>{paragraph}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
+                        <p className="mt-2 text-muted-foreground">No lecture content available</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Notes section */}
+              <div className="space-y-2">
+                <h3 className="font-medium">Your Notes</h3>
+                <Textarea 
+                  placeholder="Add your notes here..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={5}
+                />
+              </div>
+              
+              {/* Navigation buttons */}
+              {'lectures' in currentChapter && currentChapter.lectures.length > 0 && (
+                <div className="flex justify-between pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={goToPrevLecture}
+                    disabled={currentLectureIndex === 0}
+                  >
+                    <ChevronLeft className="mr-2 h-4 w-4" />
+                    Previous
+                  </Button>
+                  <Button 
+                    onClick={goToNextLecture}
+                  >
+                    {currentLectureIndex < (currentChapter.lectures?.length || 0) - 1 ? (
+                      <>
+                        Next
+                        <ChevronRight className="ml-2 h-4 w-4" />
+                      </>
+                    ) : (
+                      <>
+                        Complete
+                        <BookCheck className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </AppLayout>
