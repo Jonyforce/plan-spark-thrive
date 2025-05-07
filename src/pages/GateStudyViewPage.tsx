@@ -42,6 +42,45 @@ const GateStudyViewPage = () => {
     }
   };
 
+  // Find the next subject/chapter to study
+  const findNextLearningItem = (): { subjectId: string; chapterId: string } | null => {
+    if (!studyPlan) return null;
+    
+    // Look for an in-progress subject first
+    for (const subject of studyPlan.subjects) {
+      if (subject.status === 'in-progress') {
+        // Find a chapter that's not completed
+        for (const chapter of subject.chapters) {
+          if (chapter.status !== 'completed') {
+            return { subjectId: subject.id, chapterId: chapter.id };
+          }
+        }
+      }
+    }
+    
+    // If no in-progress subject found, find first non-completed subject
+    for (const subject of studyPlan.subjects) {
+      if (subject.status !== 'completed') {
+        // Find the first non-completed chapter
+        for (const chapter of subject.chapters) {
+          if (chapter.status !== 'completed') {
+            return { subjectId: subject.id, chapterId: chapter.id };
+          }
+        }
+      }
+    }
+    
+    // If everything is completed, just return the first subject/chapter
+    if (studyPlan.subjects.length > 0 && studyPlan.subjects[0].chapters.length > 0) {
+      return {
+        subjectId: studyPlan.subjects[0].id,
+        chapterId: studyPlan.subjects[0].chapters[0].id
+      };
+    }
+    
+    return null;
+  };
+
   if (!studyPlan) {
     return null;
   }
@@ -65,6 +104,9 @@ const GateStudyViewPage = () => {
     }
   };
 
+  // Get the next item to study
+  const nextLearningItem = findNextLearningItem();
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -85,7 +127,21 @@ const GateStudyViewPage = () => {
               <Edit className="mr-2 h-4 w-4" />
               Edit Plan
             </Button>
-            <Button className="bg-green-600 hover:bg-green-700">
+            <Button 
+              className="bg-green-600 hover:bg-green-700"
+              onClick={() => {
+                if (nextLearningItem) {
+                  // Navigate to the learning page with the subject and chapter IDs
+                  navigate(`/studies/${id}/learn/${nextLearningItem.subjectId}/${nextLearningItem.chapterId}`);
+                } else {
+                  toast({
+                    title: "No learning items found",
+                    description: "Please add subjects and chapters to your study plan first.",
+                    variant: "destructive"
+                  });
+                }
+              }}
+            >
               <BookOpenCheck className="mr-2 h-4 w-4" />
               Continue Learning
             </Button>
