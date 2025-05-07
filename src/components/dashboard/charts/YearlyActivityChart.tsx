@@ -9,7 +9,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer } from '@/components/ui/chart';
 
 // Sample data - in a real app, this would come from the database
 const data = [
@@ -48,13 +48,15 @@ export const YearlyActivityChart: React.FC = () => {
             tick={{ fontSize: 12 }}
             width={30}
           />
-          <ChartTooltip
-            content={(props) => (
-              <ChartTooltipContent
-                className="rounded-lg border bg-background p-2 shadow-md"
-                {...props}
-              />
-            )}
+          <Tooltip 
+            contentStyle={{ 
+              background: "var(--background)",
+              border: "1px solid var(--border)",
+              borderRadius: "6px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+            }}
+            itemStyle={{ color: "#8B5CF6" }}
+            labelStyle={{ fontWeight: "bold", marginBottom: "4px" }}
           />
           <Bar
             dataKey="activity"

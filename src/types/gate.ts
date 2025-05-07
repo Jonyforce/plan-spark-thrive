@@ -1,3 +1,4 @@
+
 export interface GateLecture {
   id: string;
   name: string;

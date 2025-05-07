@@ -23,8 +23,8 @@ export const LearningRetentionTable: React.FC = () => {
         <TableHeader>
           <TableRow>
             <TableHead>Study item</TableHead>
-            <TableHead>Confidence Level</TableHead>
-            <TableHead className="text-right">Status</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Confidence Level</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

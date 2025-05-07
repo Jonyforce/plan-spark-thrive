@@ -194,7 +194,7 @@ const StudyLearningPage = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>
-                  {currentLecture ? currentLecture.title : currentChapter.name}
+                  {currentLecture ? currentLecture.name : currentChapter.name}
                 </CardTitle>
               </div>
             </CardHeader>
@@ -204,9 +204,11 @@ const StudyLearningPage = () => {
                 <div className="min-h-[200px] p-4 border rounded-md bg-gray-50">
                   {currentLecture ? (
                     <div>
-                      {currentLecture.content.split('\n').map((paragraph, i) => (
-                        <p key={i}>{paragraph}</p>
-                      ))}
+                      <p>{currentLecture.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {currentLecture.timeSpent ? `Time spent: ${currentLecture.timeSpent}` : 'Not started yet'}
+                      </p>
+                      {currentLecture.notes && <p>{currentLecture.notes}</p>}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center h-full">
