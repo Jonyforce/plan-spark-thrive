@@ -28,8 +28,8 @@ export const StudyHeatmap: React.FC = () => {
   const cells = generateData();
   
   return (
-    <div className="h-[240px] flex items-center justify-center">
-      <div className="w-full max-w-md grid grid-cols-6 gap-1">
+    <div className="h-[240px] flex items-center justify-center p-4">
+      <div className="grid grid-cols-6 gap-2 w-full max-w-md">
         {cells.map((cell, i) => (
           <div
             key={i}
