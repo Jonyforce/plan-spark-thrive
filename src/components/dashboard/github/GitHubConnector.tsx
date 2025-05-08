@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { GitHubLogoIcon } from '@radix-ui/react-icons';
+import { Github } from 'lucide-react'; // Changed from GitHubLogoIcon to Github from lucide-react
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getCurrentUser } from '@/utils/auth';
@@ -138,7 +138,7 @@ export const GitHubConnector: React.FC = () => {
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="outline" className="flex items-center gap-2">
-          <GitHubLogoIcon className="h-4 w-4" />
+          <Github className="h-4 w-4" /> {/* Changed from GitHubLogoIcon to Github */}
           Connect GitHub Repository
         </Button>
       </SheetTrigger>
