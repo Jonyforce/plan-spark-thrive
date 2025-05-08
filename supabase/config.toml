@@ -1,1 +1,8 @@
+
 project_id = "pbwpialjbgoqvtniyhet"
+
+[functions.github-sync]
+verify_jwt = true
+
+[functions.github-push-report]
+verify_jwt = true

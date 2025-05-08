@@ -63,6 +63,163 @@ export type Database = {
         }
         Relationships: []
       }
+      github_accounts: {
+        Row: {
+          access_token: string
+          created_at: string
+          id: string
+          installation_id: string | null
+          refresh_token: string | null
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          id?: string
+          installation_id?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          id?: string
+          installation_id?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      github_reports: {
+        Row: {
+          content: Json
+          created_at: string
+          file_sha: string | null
+          id: string
+          pushed_at: string | null
+          report_file_url: string | null
+          report_type: string
+          repository_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          file_sha?: string | null
+          id?: string
+          pushed_at?: string | null
+          report_file_url?: string | null
+          report_type: string
+          repository_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          file_sha?: string | null
+          id?: string
+          pushed_at?: string | null
+          report_file_url?: string | null
+          report_type?: string
+          repository_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "github_reports_repository_id_fkey"
+            columns: ["repository_id"]
+            isOneToOne: false
+            referencedRelation: "github_repositories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      github_repositories: {
+        Row: {
+          commit_count: number | null
+          created_at: string
+          default_branch: string | null
+          description: string | null
+          forks_count: number | null
+          github_account_id: string
+          id: string
+          is_private: boolean | null
+          issue_count: number | null
+          language: string | null
+          last_synced: string | null
+          open_issues_count: number | null
+          owner: string
+          pr_count: number | null
+          repo_name: string
+          stars_count: number | null
+          updated_at: string
+          user_id: string
+          watchers_count: number | null
+        }
+        Insert: {
+          commit_count?: number | null
+          created_at?: string
+          default_branch?: string | null
+          description?: string | null
+          forks_count?: number | null
+          github_account_id: string
+          id?: string
+          is_private?: boolean | null
+          issue_count?: number | null
+          language?: string | null
+          last_synced?: string | null
+          open_issues_count?: number | null
+          owner: string
+          pr_count?: number | null
+          repo_name: string
+          stars_count?: number | null
+          updated_at?: string
+          user_id: string
+          watchers_count?: number | null
+        }
+        Update: {
+          commit_count?: number | null
+          created_at?: string
+          default_branch?: string | null
+          description?: string | null
+          forks_count?: number | null
+          github_account_id?: string
+          id?: string
+          is_private?: boolean | null
+          issue_count?: number | null
+          language?: string | null
+          last_synced?: string | null
+          open_issues_count?: number | null
+          owner?: string
+          pr_count?: number | null
+          repo_name?: string
+          stars_count?: number | null
+          updated_at?: string
+          user_id?: string
+          watchers_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "github_repositories_github_account_id_fkey"
+            columns: ["github_account_id"]
+            isOneToOne: false
+            referencedRelation: "github_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_retention: {
         Row: {
           confidence_level: number | null

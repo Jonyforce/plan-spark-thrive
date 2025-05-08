@@ -4,6 +4,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { ProjectCard } from '@/components/dashboard/ProjectCard';
 import { ActivityTracker } from '@/components/dashboard/ActivityTracker';
+import { GitHubDashboard } from '@/components/dashboard/github/GitHubDashboard';
 import { Check, Clock, Tag, CalendarCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useProjectStore } from '@/stores/projectStore';
@@ -42,6 +43,7 @@ const Dashboard = () => {
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="activity">Activity Tracking</TabsTrigger>
+            <TabsTrigger value="github">GitHub Integration</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="space-y-6">
@@ -141,6 +143,10 @@ const Dashboard = () => {
           
           <TabsContent value="activity">
             <ActivityTracker />
+          </TabsContent>
+
+          <TabsContent value="github">
+            <GitHubDashboard />
           </TabsContent>
         </Tabs>
       </div>
