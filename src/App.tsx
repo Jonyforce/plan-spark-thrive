@@ -17,6 +17,7 @@ import TimeTrackingPage from "./pages/TimeTrackingPage";
 import ProjectViewPage from "./pages/ProjectViewPage";
 import ProjectEditPage from "./pages/ProjectEditPage";
 import StudyLearningPage from "./pages/StudyLearningPage";
+import RoutinePlannerPage from "./pages/RoutinePlannerPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/studies/:id/learn/:subjectId/:chapterId" element={<StudyLearningPage />} />
           <Route path="/import" element={<ImportPage />} />
           <Route path="/time-tracking" element={<TimeTrackingPage />} />
+          <Route path="/routine-planner" element={<RoutinePlannerPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -271,6 +271,299 @@ export type Database = {
         }
         Relationships: []
       }
+      routine_daily_instances: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          is_override: boolean | null
+          template_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          is_override?: boolean | null
+          template_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          is_override?: boolean | null
+          template_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routine_daily_instances_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "routine_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routine_pending_tasks: {
+        Row: {
+          created_at: string
+          id: string
+          is_resolved: boolean | null
+          original_date: string
+          priority: number | null
+          reschedule_date: string | null
+          task_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_resolved?: boolean | null
+          original_date: string
+          priority?: number | null
+          reschedule_date?: string | null
+          task_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_resolved?: boolean | null
+          original_date?: string
+          priority?: number | null
+          reschedule_date?: string | null
+          task_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routine_pending_tasks_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "routine_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routine_reflections: {
+        Row: {
+          achievements: string | null
+          blockers: string | null
+          created_at: string
+          daily_instance_id: string | null
+          date: string
+          energy_rating: number | null
+          id: string
+          mood_rating: number | null
+          productivity_rating: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          achievements?: string | null
+          blockers?: string | null
+          created_at?: string
+          daily_instance_id?: string | null
+          date: string
+          energy_rating?: number | null
+          id?: string
+          mood_rating?: number | null
+          productivity_rating?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          achievements?: string | null
+          blockers?: string | null
+          created_at?: string
+          daily_instance_id?: string | null
+          date?: string
+          energy_rating?: number | null
+          id?: string
+          mood_rating?: number | null
+          productivity_rating?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routine_reflections_daily_instance_id_fkey"
+            columns: ["daily_instance_id"]
+            isOneToOne: false
+            referencedRelation: "routine_daily_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routine_task_completions: {
+        Row: {
+          actual_end_time: string | null
+          actual_start_time: string | null
+          created_at: string
+          daily_instance_id: string | null
+          date: string
+          energy_level: number | null
+          id: string
+          is_completed: boolean | null
+          is_skipped: boolean | null
+          mood: number | null
+          notes: string | null
+          skip_reason: string | null
+          task_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          created_at?: string
+          daily_instance_id?: string | null
+          date: string
+          energy_level?: number | null
+          id?: string
+          is_completed?: boolean | null
+          is_skipped?: boolean | null
+          mood?: number | null
+          notes?: string | null
+          skip_reason?: string | null
+          task_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          created_at?: string
+          daily_instance_id?: string | null
+          date?: string
+          energy_level?: number | null
+          id?: string
+          is_completed?: boolean | null
+          is_skipped?: boolean | null
+          mood?: number | null
+          notes?: string | null
+          skip_reason?: string | null
+          task_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routine_task_completions_daily_instance_id_fkey"
+            columns: ["daily_instance_id"]
+            isOneToOne: false
+            referencedRelation: "routine_daily_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routine_task_completions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "routine_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routine_tasks: {
+        Row: {
+          color: string | null
+          created_at: string
+          day_of_week: number
+          description: string | null
+          duration: number
+          icon: string | null
+          id: string
+          is_recurring: boolean | null
+          name: string
+          start_time: number
+          task_order: number
+          task_type: Database["public"]["Enums"]["routine_task_type"]
+          template_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          day_of_week: number
+          description?: string | null
+          duration: number
+          icon?: string | null
+          id?: string
+          is_recurring?: boolean | null
+          name: string
+          start_time: number
+          task_order: number
+          task_type?: Database["public"]["Enums"]["routine_task_type"]
+          template_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          day_of_week?: number
+          description?: string | null
+          duration?: number
+          icon?: string | null
+          id?: string
+          is_recurring?: boolean | null
+          name?: string
+          start_time?: number
+          task_order?: number
+          task_type?: Database["public"]["Enums"]["routine_task_type"]
+          template_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routine_tasks_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "routine_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routine_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_activity: {
         Row: {
           activity_type: Database["public"]["Enums"]["activity_type_enum"]
@@ -387,6 +680,12 @@ export type Database = {
         | "gate"
         | "time_tracking"
         | "learning_review"
+      routine_task_type:
+        | "regular"
+        | "break"
+        | "custom"
+        | "disruption"
+        | "pending"
       status_enum:
         | "not-started"
         | "in-progress"
@@ -514,6 +813,13 @@ export const Constants = {
         "gate",
         "time_tracking",
         "learning_review",
+      ],
+      routine_task_type: [
+        "regular",
+        "break",
+        "custom",
+        "disruption",
+        "pending",
       ],
       status_enum: [
         "not-started",
